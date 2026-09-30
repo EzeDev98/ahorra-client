@@ -81,12 +81,16 @@
   --icon-button-hit: 6px;
   --icon-size: 18px;
   --icon-stroke: 1.4;
+  --opacity-disabled: 0.4;
   --card-pad: 12px;
   --gap: 8px;
   --gutter: 16px;
   --content-width: 560px;
   --bar-height: 56px;
   --drawer-width: 280px;
+  --modal-width: 400px;
+  --z-overlay: 80;
+  --z-toast: 100;
 }
 
 /* Settings, Appearance: force a theme. No attribute means follow the system. */

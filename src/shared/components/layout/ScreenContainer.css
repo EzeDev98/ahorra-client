@@ -1,0 +1,17 @@
+.ui-screen {
+  display: flex;
+  justify-content: center;
+  min-height: 100dvh;
+  padding:
+    env(safe-area-inset-top)
+    env(safe-area-inset-right)
+    env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
+.ui-screen__inner {
+  display: flex;
+  flex-direction: column;
+  width: min(calc(var(--content-width) + var(--gutter) * 2), 100%);
+  padding-inline: var(--gutter);
+}

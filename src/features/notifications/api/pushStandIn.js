@@ -1,0 +1,20 @@
+// Stand-in for the missing push-subscription endpoints. Nothing is sent anywhere; the subscription is kept on this device.
+const KEY = 'ahorra.standin.push';
+
+export const pushStandIn = {
+  subscribe: async ({ endpoint, keys }) => {
+    try {
+      localStorage.setItem(KEY, JSON.stringify({ endpoint, keys }));
+    } catch {
+      // Storage unavailable: nothing to keep.
+    }
+  },
+
+  unsubscribe: async () => {
+    try {
+      localStorage.removeItem(KEY);
+    } catch {
+      // Storage unavailable: nothing to remove.
+    }
+  },
+};

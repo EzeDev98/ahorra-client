@@ -1,0 +1,104 @@
+import { useRef } from 'react';
+import './OtpField.css';
+import { useFormField } from './formFieldContext.js';
+import { cx } from '@shared/utils/classNames.js';
+
+const onlyDigits = (text) => text.replace(/\D/g, '');
+
+// value: the digits typed so far, as a string. onChange(nextString). onComplete(code) fires when all boxes are filled.
+export default function OtpField({
+  value = '',
+  onChange,
+  onComplete,
+  length = 6,
+  invalid,
+  disabled = false,
+  autoFocus = false,
+  className,
+}) {
+  const field = useFormField();
+  const boxes = useRef([]);
+  const isInvalid = invalid ?? field.invalid ?? false;
+
+  const focusBox = (index) => boxes.current[Math.max(0, Math.min(index, length - 1))]?.focus();
+
+  const commit = (next) => {
+    onChange?.(next);
+    if (next.length === length) onComplete?.(next);
+  };
+
+  const handleChange = (index, event) => {
+    const digits = onlyDigits(event.target.value);
+    if (!digits) return;
+    // Typing over a filled box gives two characters; keep the new one.
+    const incoming = value[index] && digits.length === 2 ? digits.slice(-1) : digits;
+    const next =
+      incoming.length === 1
+        ? value.slice(0, index) + incoming + value.slice(index + 1)
+        : (value.slice(0, index) + incoming).slice(0, length);
+    commit(next.slice(0, length));
+    focusBox(Math.min(next.length, length - 1));
+  };
+
+  const handleKeyDown = (index, event) => {
+    if (event.key === 'Backspace') {
+      event.preventDefault();
+      if (value[index]) {
+        commit(value.slice(0, index) + value.slice(index + 1));
+      } else if (index > 0) {
+        commit(value.slice(0, index - 1) + value.slice(index));
+        focusBox(index - 1);
+      }
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      focusBox(index - 1);
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      focusBox(index + 1);
+    }
+  };
+
+  const handlePaste = (index, event) => {
+    const digits = onlyDigits(event.clipboardData.getData('text'));
+    if (!digits) return;
+    event.preventDefault();
+    const next = (value.slice(0, index) + digits).slice(0, length);
+    commit(next);
+    focusBox(next.length);
+  };
+
+  const handleFocus = (index, event) => {
+    event.target.select();
+    // Never leave a gap: focus the first empty box instead.
+    if (index > value.length) focusBox(value.length);
+  };
+
+  return (
+    <div role="group" aria-labelledby={field.labelId} className={cx('ui-otp', className)}>
+      {Array.from({ length }, (_, index) => (
+        <input
+          key={index}
+          ref={(node) => {
+            boxes.current[index] = node;
+          }}
+          id={index === 0 ? field.id : undefined}
+          className={cx('ui-otp__box', isInvalid && 'ui-otp__box--invalid')}
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          autoComplete={index === 0 ? 'one-time-code' : 'off'}
+          autoFocus={autoFocus && index === 0}
+          disabled={disabled}
+          aria-label={`Digit ${index + 1} of ${length}`}
+          aria-invalid={isInvalid || undefined}
+          aria-describedby={field.describedBy}
+          value={value[index] ?? ''}
+          onChange={(event) => handleChange(index, event)}
+          onKeyDown={(event) => handleKeyDown(index, event)}
+          onPaste={(event) => handlePaste(index, event)}
+          onFocus={(event) => handleFocus(index, event)}
+        />
+      ))}
+    </div>
+  );
+}

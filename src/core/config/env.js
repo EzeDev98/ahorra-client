@@ -11,4 +11,8 @@ new URL(raw);
 export const env = Object.freeze({
   // Includes the server's base path (/api/v1), no trailing slash.
   apiBaseUrl: raw.replace(/\/+$/, ''),
+  // Areas served by a local stand-in instead of the server (comma list in VITE_STAND_INS). Remove a name once its endpoint exists.
+  standIns: Object.freeze(
+    (import.meta.env.VITE_STAND_INS ?? 'obligations,push,spending-plan').split(',').map((name) => name.trim()).filter(Boolean),
+  ),
 });

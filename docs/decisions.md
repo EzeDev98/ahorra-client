@@ -37,3 +37,9 @@ Light and dark are chosen with `light-dark()` in `tokens.css`, so each colour is
 ## Tooling
 
 ESLint is pinned to 9: `eslint-plugin-react` does not support ESLint 10 yet. Revisit when it does.
+
+## Step 3 decisions
+
+| # | Decision | Answer | Status |
+|---|---|---|---|
+| D5 | Client data cache | TanStack Query (`@tanstack/react-query`). In-memory only, nothing persisted (Ahorra is online-only). Cleared when the session ends. | AGREED (owner) |
