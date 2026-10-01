@@ -11,6 +11,7 @@ import './styles/bridge.css';
 import { configureHttpClient } from '@core/http/httpClient.js';
 import { clearQueryData, queryClient } from '@core/data/queryClient.js';
 import { sessionManager } from '@features/auth/session/sessionManager.js';
+import { startRefreshAhead } from '@features/auth/session/refreshAhead.js';
 import ErrorBoundary from '@shared/components/feedback/ErrorBoundary.jsx';
 import DeviceGate from '@features/device/DeviceGate.jsx';
 import App from '@app/App.jsx';
@@ -27,6 +28,7 @@ sessionManager.subscribe(() => {
   if (!sessionManager.hasSession()) clearQueryData();
 });
 
+startRefreshAhead();
 registerServiceWorker();
 
 createRoot(document.getElementById('root')).render(

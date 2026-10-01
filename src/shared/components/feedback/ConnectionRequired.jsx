@@ -4,9 +4,9 @@ import ScreenContainer from '@shared/components/layout/ScreenContainer.jsx';
 import AppLogo from '@shared/components/branding/AppLogo.jsx';
 import './ConnectionRequired.css';
 
-export default function ConnectionRequired() {
+export default function ConnectionRequired({ visible = true }) {
   return (
-    <ScreenContainer className="connection-required" role="alert">
+    <ScreenContainer className="connection-required" role="alert" data-visible={visible}>
       <AppLogo className="connection-required__logo" />
       <EmptyState
         icon={WifiOff}

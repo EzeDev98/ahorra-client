@@ -10,7 +10,7 @@ export function withGuards({ installed, authenticated, unlocked, setupComplete }
   let guarded = element;
   if (setupComplete) guarded = <SetupGuard redirectTo={ROUTES.setupIncome}>{guarded}</SetupGuard>;
   if (unlocked) guarded = <UnlockGuard redirectTo={ROUTES.unlock}>{guarded}</UnlockGuard>;
-  if (authenticated) guarded = <AuthGuard redirectTo={ROUTES.welcome}>{guarded}</AuthGuard>;
+  if (authenticated) guarded = <AuthGuard redirectTo={ROUTES.welcome} sessionEndedTo={ROUTES.login}>{guarded}</AuthGuard>;
   if (installed) guarded = <InstallGuard redirectTo={ROUTES.install}>{guarded}</InstallGuard>;
   return guarded;
 }

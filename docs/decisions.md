@@ -178,3 +178,103 @@ ESLint is pinned to 9: `eslint-plugin-react` does not support ESLint 10 yet. Rev
 | Setup check | Launch reads `GET /income` through the `income.current` query, so `SetupGuard` finds it fresh. Not asked when offline; given up after 3 s. Unknown means Home, and `SetupGuard` shows its loader or error screen. A return to the foreground reads the cache only and makes no request. | PROPOSED |
 | Props | `StartupGate` no longer takes `startPath`, `homeTo` or `welcomeTo`: it sits in `src/app/` and imports `ROUTES`. | ADOPTED |
 | For Step 8 | Set the lock state to locked at boot when app lock is on, before the first render, so launch sees it. Lock on return to the foreground (8d) before `ResumeDecision`'s listener reads it, or let `UnlockGuard` react, which it does live. | OPEN (carried forward) |
+
+## Step 6a decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Location | `src/features/auth/welcome/` (`Welcome.jsx`, `Welcome.css`, `welcomeContent.js`). Route `/welcome`, still flagged `installed` only. Each later auth screen gets its own folder under `features/auth/`. | ADOPTED |
+| Paths | `Welcome` takes `registerTo`, `loginTo` and `signedInTo` and holds no path; `routeConfig.jsx` passes them from `ROUTES`. | ADOPTED |
+| Buttons | Create account (primary) and Sign in (secondary), full width, at the bottom. No Google button until the server supports it. No back button: Welcome is the first screen of the installed app. | PROPOSED |
+| Layout | Logo (large), title and one line of text in the middle of the free space, left-aligned like Onboarding. | PROPOSED |
+| Copy | Title "Welcome"; text "Create an account to start keeping your books, or sign in if you already have one." | PROPOSED |
+| Signed-in visitor | A person with a stored session who reaches Welcome is sent to Home (`replace`); the guards then send them on to Unlock or the income setup if needed. The plan said Login; see the note in the 6a reply. One-line change in `routeConfig.jsx` (`signedInTo`) if Login is wanted. | PROPOSED |
+
+## Step 6b decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Location | `src/features/auth/register/`: `Register.jsx` (state, submit), `PersonalStep.jsx`, `AccountStep.jsx`, `registerRules.js`, `registerContent.js`. One route, `/register`, with the step held in the screen (not in the address). | ADOPTED |
+| Paths | `Register` takes `backTo` (Welcome) and `verifyPhoneTo` and holds no path; `routeConfig.jsx` passes them from `ROUTES`. | ADOPTED |
+| Step 1 | First name, middle name (optional), last name, date of birth. Date of birth is the browser's date picker (it returns `yyyy-MM-dd`), limited to 18 or over and 1900 onward; the rule is checked in code as well. | PROPOSED |
+| Step 2 | Username, email, phone, password, confirm password. Password fields use `autoComplete="new-password"`. | ADOPTED |
+| Client rules | Mirror `RegistrationValidator`: names, username and email required; phone `^\+?[0-9]{11}$` (spaces and hyphens are dropped first); password at least 8 characters; passwords match; age counted in whole years as the server does. One rule is stricter than the server's: email must look like an address. Errors show on submit, move focus to the first wrong field, and clear as the field is edited. | ADOPTED |
+| Server errors | 409 messages name what is taken (phone, email or username) and are shown under that field; any other server message shows above the Create account button. The server's text is shown as it is sent. | PROPOSED |
+| On success | `pendingVerification` (`src/features/auth/verification/`) keeps `{ phoneNumber, username }` in sessionStorage, then the app goes to Verify phone with `replace`, so Back does not return to a form for an account that now exists. Never stores a password. | ADOPTED |
+| Step change | The form slides and fades in over `--motion-base` (reduced motion: fade). Step 2's back button returns to step 1 with everything kept. The browser's Back leaves Register, since the step is not in the address. | PROPOSED |
+| Not included | No "Already have an account? Sign in" link on this screen; Welcome has the Sign in button. | OPEN |
+
+## Step 6c decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Location | `src/features/auth/verification/`: `VerifyPhone.jsx`, `verifyContent.js`, `maskPhone.js`, and `pendingVerification.js` (from 6b, now with a resend time and `update`). `useCountdown` is in `src/shared/hooks/`, for reuse by the password-reset resend (6e). Route `/verify-phone`. | ADOPTED |
+| Paths | `VerifyPhone` takes `welcomeTo` and `loginTo` and holds no path. | ADOPTED |
+| No pending state | Opening `/verify-phone` with nothing to verify (no registration or unverified login in this session) redirects to Welcome. | PROPOSED |
+| Code length | 6 digits, one constant (`OTP_LENGTH`). Matches the password-reset code on this server; the phone-verification code is made by `internal-auth-server` and its length is not confirmed. | PROPOSED |
+| Submit | The code submits by itself when the last digit is entered, and by the Verify button. A failed attempt shows the server's message under the boxes, clears the code and puts the cursor in the first box. The server's 400 (invalid or expired) and 429 (too many attempts) texts are shown as sent. | PROPOSED |
+| Resend | A ghost button that counts down ("Resend code in 42s") and is disabled until the cooldown ends. The cooldown is 60 s from the code being sent (Register stores the end time) and survives a reload of the screen. A 429 on resend restarts it from any number of seconds named in the server's message, else 60 s. Success shows a toast and clears the boxes. | PROPOSED |
+| Cooldown value | 60 s is the password-reset default on this server; the phone-verification value belongs to `internal-auth-server` and is unconfirmed. | OPEN |
+| On success | Clears the pending state, shows a "Phone verified. Sign in to continue." toast, and goes to Login with `replace`, passing `{ username }` in the navigation state for Login (6d) to fill in. | PROPOSED |
+| Back | Goes to Welcome and keeps the pending state, so signing in later (6d) can pick the verification up again. | PROPOSED |
+| Toasts | `ToastProvider` is now mounted in `App.jsx`, inside the startup gate and outside the router. | ADOPTED |
+| Wrong phone number | The server has no way to change the number on an unverified account, so a mistyped number cannot be fixed from this screen. | OPEN (needs a server endpoint or a decision) |
+
+## Step 6d decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| D7 Login identifier | Username and password. The server's `POST /auth/login` takes `username` and `password` (`AuthController`), and rejects blanks with 400. Whether `internal-auth-server` would also accept the phone number as the identifier is unconfirmed, so the field is labelled Username. | PROPOSED |
+| Location | `src/features/auth/login/`: `Login.jsx`, `Login.css`, `loginRules.js`, `loginContent.js`. Route `/login`. | ADOPTED |
+| Paths and routing | `Login` takes `welcomeTo`, `forgotPasswordTo`, `verifyPhoneTo`, `homeTo` and `resolveDestination`, and holds no path and imports nothing from `src/app/`. `routeConfig.jsx` passes `decideRoute({ launching: true })` as `resolveDestination`. | ADOPTED |
+| On success | `sessionManager.start(response)` stores the tokens, any pending verification is cleared, then the startup routing decision (5e) picks Unlock, the income setup or Home. Home is the fallback if that decision fails. The button stays busy until the screen changes. | ADOPTED |
+| Wrong credentials | A 401 shows "Incorrect username or password." above the button (not under a field, so it does not say which was wrong). The password is cleared and focused. Other server errors (429 and so on) show the server's text as sent. | PROPOSED |
+| Unverified phone | The server has no code for it; the message from `internal-auth-server` is passed through. Login recognises it by wording (`UNVERIFIED_MESSAGE`) and shows a warning banner with a "Verify phone" button, but only if this device registered that username in this session (so the phone number is known). | PROPOSED, UNCONFIRMED wording |
+| Unverified, number unknown | A person who registered earlier, on another device, or whose session storage was cleared cannot resume verification: the verify screen needs the phone number and nothing here supplies it. Needs either a phone field on the verify screen or the server returning the number. | OPEN |
+| mfaRequired | No session is started. A warning banner says a second verification step is needed that Ahorra cannot complete yet (server task S7). | ADOPTED |
+| After verification | `VerifyPhone` passes `{ username }` in the navigation state; Login fills it in. | ADOPTED |
+| Forgot password | A link under the password field to `/forgot-password`. | ADOPTED |
+| Signed-in visitor | Login does not redirect someone who already has a session (Welcome does). Redirecting here would race the routing decision that runs right after sign-in. | OPEN |
+| Token expiry | `sessionManager.start` stores the tokens only; the response's `expiresIn` values are not kept, so refresh happens when the server answers 401. "Refresh before expiry" is Step 6f. | OPEN (6f) |
+
+## Step 6e decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Location | `src/features/auth/passwordReset/`: `RequestReset.jsx`, `VerifyResetCode.jsx`, `CreateNewPassword.jsx`, `passwordResetFlow.js` (the one small module that carries state across the screens), `resetRules.js`, `resetContent.js`. Routes `/forgot-password`, `/forgot-password/verify`, `/forgot-password/new-password`. | ADOPTED |
+| Paths | Each screen takes its destinations as props (`backTo`, `verifyCodeTo`, `requestTo`, `newPasswordTo`, `loginTo`) and holds no path; `routeConfig.jsx` passes them from `ROUTES`. | ADOPTED |
+| Identifier | The phone number, as the server's reset endpoints take it (not the username). Same rule as registration (11 digits, may start with `+`; `PHONE` is now exported from `registerRules.js` and reused). The number must match the one registered, so the hint says so. | ADOPTED |
+| Server facts (VERIFIED in `ahorra-server`) | OTP 6 digits, 5 min expiry, 5 attempts, 60 s resend cooldown; reset token valid 10 min; `/request` is limited to 5 per phone number per 24 h; completing a reset revokes the account's sessions. | VERIFIED |
+| Resend | Calls `POST /password-reset/request` again, so each resend uses one of the 5 daily requests. Countdown button, same as Verify phone. A 429 restarts the countdown from any seconds the message names, else 60 s; the daily-limit message is shown as sent. | PROPOSED |
+| Enumeration | The server answers the same for unknown numbers, so the code screen says "If an account uses 0801••••678, we sent a code to it" and never confirms an account. | ADOPTED |
+| Same-number shortcut | Back from the code screen, same number, cooldown still running, no reset token yet: Send code goes straight to the code screen instead of asking again and earning a 429. | PROPOSED |
+| State storage | Phone number and cooldown end in sessionStorage (a reload on the code screen keeps them). The reset token is memory only, never stored; a reload on the new-password screen returns to the first screen. | ADOPTED |
+| History | Code screen is replaced by the new-password screen on success (the code is used up). On success the new-password screen is replaced by Login, with a "Password changed" toast. | PROPOSED |
+| Back on new password | Starts again at the first screen and drops the token, because the code is already used. A failed attempt also shows a "Start again" button. | PROPOSED |
+| Password rule | At least 8 characters and the two fields must match, mirroring registration. The password rules inside `internal-auth-server` are unconfirmed; its message is shown if it refuses one. | PROPOSED |
+| Shared helper | `cooldownFromMessage` in `src/shared/utils/cooldown.js`. `VerifyPhone.jsx` still has its own copy of the same function; switch it over when convenient. | OPEN (tidy-up) |
+
+## Step 6f decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Expiry source | The access token's own `exp` claim first (always seconds). `expiresIn` from the response is a fallback only, read as seconds and ignored below 120. Its unit is not confirmed: `internal-auth-server` is not in this repository. Stored as `accessExpiresAt` in the session; sessions saved earlier get it from the token. | PROPOSED, UNCONFIRMED unit |
+| Refresh token expiry | `refreshExpiresIn` is not used. A wrong unit would sign people out early; the server's 401 on refresh already ends an expired session. | PROPOSED |
+| Refresh-ahead | `refreshAhead.js`, started from `main.jsx`. Asks for a new access token when under 60 s remain; re-checks when the app returns to the foreground and when the network returns; retries every 30 s after a failure that keeps the session; never more than once a minute (a fast device clock cannot cause a loop). The 401 recovery in the HTTP client stays as the safety net. | PROPOSED |
+| Several tabs | Each tab runs its own timer. If two refresh at once, the second sees the first's tokens (existing check in `sessionManager`). No cross-tab lock. | OPEN |
+| Sign-out | `sessionManager.signOut()` clears the device first, then tells the server (`POST /logout/user`). The server only accepts a live access token, so an expired one is refreshed first. Offline, the device is signed out but the server session stays active until the next login replaces it. No screen calls it yet (Settings, Step 8; side panel, Step 9m). | ADOPTED |
+| Ended session | A revoked session (401 code `SESSION_REVOKED`) or one that cannot be refreshed leaves state cleared (existing) and lands on Login with a banner: "You were signed out" (revoked) or "Your session expired". A normal sign-out still lands on Welcome. `AuthGuard` chooses by `getEndedReason()`; the banner is not kept across a reload. | PROPOSED (changes 5c's Welcome redirect for ended sessions only) |
+
+## Step 6g decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Shape | The offline screen is the overlay built in 3d (`NetworkGate` and `ConnectionRequired`), not a route. The app stays mounted underneath, so the person returns to the same screen with typed values intact and nothing stored for later. | ADOPTED |
+| `/offline` route | Removed from `routes.js` and `routeConfig.jsx`: a route would unmount the screen the person was on, and nothing navigated to it. `/offline` now falls to the catch-all. | PROPOSED |
+| Portals | While offline, everything on `<body>` outside the app root (open dialogs, the side panel, toasts) is made inert along with the app, so keyboard and screen readers cannot reach behind the notice. | ADOPTED |
+| Focus | The element that had focus is remembered when the connection drops and focused again when it returns. | ADOPTED |
+| Transition | The notice fades in and out over `--motion-base` (`--motion-reduced` when asked), and stops catching taps as soon as the connection returns. | ADOPTED |
+| Reconnect | Queries refetch on reconnect (`refetchOnReconnect`, 3e) and the token refresher re-checks on `online` (6f); nothing else is needed here. | ADOPTED |
+| Known limit | `navigator.onLine` is true on a network with no internet (a captive Wi-Fi, for example), so the notice does not appear then. Requests fail with "Could not reach the server" on whichever screen made them, as before. | OPEN |
+| Known limit | An item that opens after the drop (a toast from a request that was already in flight) is not made inert, and shares the notice's z-index. | OPEN |
+| `OFFLINE_MESSAGE` | Still exported from `useNetwork.js` for the moments `navigator.onLine` lags the real connection; the capture and confirm screens use it (Step 9). | OPEN (Step 9) |

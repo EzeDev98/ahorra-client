@@ -1,5 +1,13 @@
 import { lazy, Suspense } from 'react';
 import Onboarding from '@features/onboarding/Onboarding.jsx';
+import VerifyPhone from "@features/auth/verification/VerifyPhone.jsx";
+import Login from "@features/auth/login/Login.jsx";
+import RequestReset from '@features/auth/passwordReset/RequestReset.jsx';
+import VerifyResetCode from '@features/auth/passwordReset/VerifyResetCode.jsx';
+import CreateNewPassword from '@features/auth/passwordReset/CreateNewPassword.jsx';
+import { decideRoute } from "@app/startup/decideRoute.js";
+import Register from "@features/auth/register/Register.jsx";
+import Welcome from "@features/auth/welcome/Welcome.jsx";
 import Install from '@features/install/Install.jsx';
 import RoutePlaceholder from './RoutePlaceholder.jsx';
 import { ROUTES } from './routes.js';
@@ -25,14 +33,13 @@ export const ROUTE_CONFIG = [
   { path: ROUTES.onboarding, ...OPEN, element: <Onboarding installTo={ROUTES.install} welcomeTo={ROUTES.welcome} /> },
   { path: ROUTES.install, ...OPEN, element: <Install backTo={ROUTES.onboarding} welcomeTo={ROUTES.welcome} /> },
 
-  { path: ROUTES.welcome, ...BEFORE_SIGN_IN, element: soon('Welcome') },
-  { path: ROUTES.offline, ...BEFORE_SIGN_IN, element: soon('Needs a connection') },
-  { path: ROUTES.register, ...BEFORE_SIGN_IN, element: soon('Create account') },
-  { path: ROUTES.verifyPhone, ...BEFORE_SIGN_IN, element: soon('Verify phone') },
-  { path: ROUTES.login, ...BEFORE_SIGN_IN, element: soon('Sign in') },
-  { path: ROUTES.forgotPassword, ...BEFORE_SIGN_IN, element: soon('Forgot password') },
-  { path: ROUTES.verifyResetCode, ...BEFORE_SIGN_IN, element: soon('Verify reset code') },
-  { path: ROUTES.createNewPassword, ...BEFORE_SIGN_IN, element: soon('Create new password') },
+  { path: ROUTES.welcome, ...BEFORE_SIGN_IN, element: <Welcome registerTo={ROUTES.register} loginTo={ROUTES.login} signedInTo={ROUTES.home} /> },
+  { path: ROUTES.register, ...BEFORE_SIGN_IN, element: <Register backTo={ROUTES.welcome} verifyPhoneTo={ROUTES.verifyPhone} /> },
+  { path: ROUTES.verifyPhone, ...BEFORE_SIGN_IN, element: <VerifyPhone welcomeTo={ROUTES.welcome} loginTo={ROUTES.login} /> },
+  { path: ROUTES.login, ...BEFORE_SIGN_IN, element: <Login welcomeTo={ROUTES.welcome} forgotPasswordTo={ROUTES.forgotPassword} verifyPhoneTo={ROUTES.verifyPhone} homeTo={ROUTES.home} resolveDestination={() => decideRoute({ launching: true })} /> },
+  { path: ROUTES.forgotPassword, ...BEFORE_SIGN_IN, element: <RequestReset backTo={ROUTES.login} verifyCodeTo={ROUTES.verifyResetCode} /> },
+  { path: ROUTES.verifyResetCode, ...BEFORE_SIGN_IN, element: <VerifyResetCode requestTo={ROUTES.forgotPassword} newPasswordTo={ROUTES.createNewPassword} /> },
+  { path: ROUTES.createNewPassword, ...BEFORE_SIGN_IN, element: <CreateNewPassword requestTo={ROUTES.forgotPassword} loginTo={ROUTES.login} /> },
 
   { path: ROUTES.setupIncome, ...FIRST_RUN, element: soon('Your income') },
   { path: ROUTES.setupObligations, ...FIRST_RUN, element: soon('Fixed obligations') },
