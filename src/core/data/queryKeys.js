@@ -22,6 +22,10 @@ export const queryKeys = {
     history: () => ['income', 'history'],
     variance: (date) => ['income', 'variance', date ?? null],
   },
+  obligations: {
+    all: ['obligations'],
+    list: () => ['obligations', 'list'],
+  },
   behavior: {
     all: ['behavior'],
     overview: () => ['behavior', 'overview'],

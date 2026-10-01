@@ -1,0 +1,49 @@
+.obligations__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.obligations__label {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-text-muted);
+}
+
+.obligations__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+}
+
+.obligations__chip svg {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  stroke-width: var(--icon-stroke);
+}
+
+.obligations__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.obligation__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gutter);
+}
+
+.obligation__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+}
+
+.obligation__name {
+  min-width: 0;
+  font-size: var(--text-md);
+  line-height: var(--leading-md);
+  overflow-wrap: anywhere;
+}

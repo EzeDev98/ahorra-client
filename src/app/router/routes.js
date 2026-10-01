@@ -18,6 +18,7 @@ export const ROUTES = Object.freeze({
   // First-run setup
   setupIncome: '/setup/income',
   setupObligations: '/setup/obligations',
+  setupLock: '/setup/lock',
 
   // App lock. setPin is reached from setup and from Settings, Security.
   setPin: '/set-pin',

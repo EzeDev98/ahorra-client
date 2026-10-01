@@ -25,11 +25,15 @@ const save = (list) => {
   memory = write(list);
 };
 
+// Ids must stay unique even when several are created in the same millisecond.
+let lastId = 0;
+const nextId = () => (lastId = Math.max(Date.now(), lastId + 1));
+
 export const obligationsStandIn = {
   list: async () => load().map((item) => ({ ...item })),
 
   create: async ({ name, amount, cadence }) => {
-    const item = { id: Date.now(), name, amount, cadence, active: true };
+    const item = { id: nextId(), name, amount, cadence, active: true };
     save([...load(), item]);
     return { ...item };
   },

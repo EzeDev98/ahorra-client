@@ -5,13 +5,14 @@ import { isPWAInstalled } from '@core/pwa/isPWAInstalled.js';
 import { sessionManager } from '@features/auth/session/sessionManager.js';
 import { lockState } from '@features/lock/lockState.js';
 import { incomeApi } from '@features/setup/api/incomeApi.js';
+import { setupStatus } from '@features/setup/setupStatus.js';
 import { isOnline } from '@shared/hooks/useNetwork.js';
 import { ROUTES } from '@app/router/routes.js';
 
 // Longest a launch waits to learn whether income is set. After this it lands on Home and SetupGuard takes over.
 const INCOME_WAIT_MS = 3000;
 // The setup screens. A person already on one of these is not sent back to the first.
-const SETUP_ROUTES = [ROUTES.setupIncome, ROUTES.setupObligations, ROUTES.setPin];
+const SETUP_ROUTES = [ROUTES.setupIncome, ROUTES.setupObligations, ROUTES.setupLock, ROUTES.setPin];
 
 const tooSlow = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('Too slow')), ms));
 
@@ -50,6 +51,9 @@ export async function decideRoute({ launching, pathname = '' }) {
 
   const incomeSet = await isIncomeSet({ fetch: launching });
   if (incomeSet === false) return SETUP_ROUTES.includes(pathname) ? null : ROUTES.setupIncome;
+
+  // Income is set but setup was never finished on this device (closed part-way, or a new device): resume it.
+  if (incomeSet === true && !setupStatus.isComplete()) return SETUP_ROUTES.includes(pathname) ? null : ROUTES.setupObligations;
 
   return launching ? ROUTES.home : null;
 }

@@ -8,6 +8,9 @@ import CreateNewPassword from '@features/auth/passwordReset/CreateNewPassword.js
 import { decideRoute } from "@app/startup/decideRoute.js";
 import Register from "@features/auth/register/Register.jsx";
 import Welcome from "@features/auth/welcome/Welcome.jsx";
+import SetupIncome from '@features/setup/income/SetupIncome.jsx';
+import SetupObligations from '@features/setup/obligations/SetupObligations.jsx';
+import LockOffer from '@features/lock/LockOffer.jsx';
 import Install from '@features/install/Install.jsx';
 import RoutePlaceholder from './RoutePlaceholder.jsx';
 import { ROUTES } from './routes.js';
@@ -17,11 +20,13 @@ import { ROUTES } from './routes.js';
 //   authenticated   the person must be signed in (AuthGuard, Step 5c)
 //   unlocked        if app lock is on, the app must be unlocked first (UnlockGuard, Step 5c)
 //   setupComplete   income must already be set, or the person goes to the income setup (SetupGuard, Step 5c)
+//   firstRunOnly    a first-run screen: once setup is finished it goes to Home (FirstRunGuard, Step 7d)
 // A step that builds a screen replaces that route's `soon(...)` element and touches nothing else.
 const OPEN = {}; // Onboarding, Install: reachable from a browser tab
 const BEFORE_SIGN_IN = { installed: true };
 const SIGNED_IN = { installed: true, authenticated: true }; // the unlock screen itself
 const FIRST_RUN = { installed: true, authenticated: true, unlocked: true }; // setup screens and Set PIN: income may not be set yet
+const SETUP_SCREEN = { ...FIRST_RUN, firstRunOnly: true }; // income, fixed obligations, the lock offer: only until setup is finished
 const IN_APP = { ...FIRST_RUN, setupComplete: true }; // every other screen in the app
 
 const soon = (name) => <RoutePlaceholder name={name} />;
@@ -41,8 +46,9 @@ export const ROUTE_CONFIG = [
   { path: ROUTES.verifyResetCode, ...BEFORE_SIGN_IN, element: <VerifyResetCode requestTo={ROUTES.forgotPassword} newPasswordTo={ROUTES.createNewPassword} /> },
   { path: ROUTES.createNewPassword, ...BEFORE_SIGN_IN, element: <CreateNewPassword requestTo={ROUTES.forgotPassword} loginTo={ROUTES.login} /> },
 
-  { path: ROUTES.setupIncome, ...FIRST_RUN, element: soon('Your income') },
-  { path: ROUTES.setupObligations, ...FIRST_RUN, element: soon('Fixed obligations') },
+  { path: ROUTES.setupIncome, ...SETUP_SCREEN, element: <SetupIncome nextTo={ROUTES.setupObligations} /> },
+  { path: ROUTES.setupObligations, ...SETUP_SCREEN, element: <SetupObligations backTo={ROUTES.setupIncome} nextTo={ROUTES.setupLock} /> },
+  { path: ROUTES.setupLock, ...SETUP_SCREEN, element: <LockOffer backTo={ROUTES.setupObligations} setPinTo={ROUTES.setPin} homeTo={ROUTES.home} /> },
 
   { path: ROUTES.setPin, ...FIRST_RUN, element: soon('Set PIN') },
   { path: ROUTES.unlock, ...SIGNED_IN, element: soon('Unlock') },

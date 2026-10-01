@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Row, Sample, Section } from '../Section.jsx';
 import AmountField from '@shared/components/ui/AmountField.jsx';
+import ChipSelect from '@shared/components/ui/ChipSelect.jsx';
 import Checkbox from '@shared/components/ui/Checkbox.jsx';
 import FormError from '@shared/components/ui/FormError.jsx';
 import FormField from '@shared/components/ui/FormField.jsx';
@@ -25,6 +26,7 @@ export default function FormsSection() {
   const [amount, setAmount] = useState('1500000.5');
   const [remember, setRemember] = useState(true);
   const [choice, setChoice] = useState('monthly');
+  const [chip, setChip] = useState('MONTHLY');
 
   return (
     <Section
@@ -130,6 +132,21 @@ export default function FormsSection() {
             ))}
             <Radio name="gallery-period-disabled" label="Disabled" disabled />
           </div>
+        </Sample>
+        <Sample label="ChipSelect (single choice; selected is filled)">
+          <FormField label="Income period">
+            <ChipSelect
+              name="gallery-chip"
+              value={chip}
+              onChange={setChip}
+              options={[
+                { value: 'DAILY', label: 'Daily' },
+                { value: 'WEEKLY', label: 'Weekly' },
+                { value: 'MONTHLY', label: 'Monthly' },
+                { value: 'CUSTOM', label: 'Custom' },
+              ]}
+            />
+          </FormField>
         </Sample>
         <Sample label="FormError on its own (form-level)">
           <Row><FormError>Could not reach the server. Try again.</FormError></Row>

@@ -278,3 +278,69 @@ ESLint is pinned to 9: `eslint-plugin-react` does not support ESLint 10 yet. Rev
 | Known limit | `navigator.onLine` is true on a network with no internet (a captive Wi-Fi, for example), so the notice does not appear then. Requests fail with "Could not reach the server" on whichever screen made them, as before. | OPEN |
 | Known limit | An item that opens after the drop (a toast from a request that was already in flight) is not made inert, and shares the notice's z-index. | OPEN |
 | `OFFLINE_MESSAGE` | Still exported from `useNetwork.js` for the moments `navigator.onLine` lags the real connection; the capture and confirm screens use it (Step 9). | OPEN (Step 9) |
+
+## Step 7a decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Location | `src/features/setup/income/`: `SetupIncome.jsx`, `incomeRules.js`, `incomeContent.js`. Route `/setup/income`, with `nextTo` passed in from `routeConfig.jsx`. New shared `ChipSelect` (`src/shared/components/ui/`), also in the gallery. `src/features/setup/setupSteps.js` holds the step count for 7b. | ADOPTED |
+| Server rules (VERIFIED in `IncomeServiceImpl`) | Minimum above zero; maximum not below minimum; both below 1,000,000,000,000; at most 2 decimals; a custom period needs a length of 1 to 366 days. The first record starts on the registration day. A second `PUT /income` on the same day corrects the record in place; on a later day it closes the old record and starts a new one. | VERIFIED |
+| Client rules | Mirror the server's, with messages worded for the form. The server's message is shown under the button if it refuses something the client let through. | ADOPTED |
+| Default period | Monthly is preselected, so most people only enter two amounts (the under-a-minute target). | PROPOSED [DECISION] |
+| Wording | Fields read "Lowest income" and "Highest income", with a hint that the same amount is fine when income never changes. The screen says Ahorra compares spending with the lower end (Guide 2.2). | PROPOSED [DECISION] |
+| Maximum | Kept required, as the server requires it. A blank maximum meaning "same as minimum" was considered and not adopted. | PROPOSED |
+| Setup indicator | "Step 1 of 2" (income, then fixed obligations). The app-lock offer and the finish are not counted. | PROPOSED |
+| No Back button | There is nowhere meaningful to go back to before setup. | PROPOSED |
+| After saving | The saved income is written into `queryKeys.income.current()` before navigating (the contract in `SetupGuard`). The other income queries and all report queries are marked stale. Navigation pushes, so Back from obligations returns here, prefilled from that cache. | ADOPTED |
+| Direct visit | Prefill reads only the cache; this screen makes no `GET`. Someone who already has income and types `/setup/income` sees an empty form, and saving creates a new record. Guarding that belongs with 7d, once "setup complete" exists. | OPEN |
+| Amounts on the wire | Sent as JSON numbers (never above 12 digits plus 2 decimals, so no precision is lost). | ADOPTED |
+
+## Step 7b decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Location | `src/features/setup/obligations/`: `SetupObligations.jsx` (reads the list), `ObligationsForm.jsx` (draft, animations, save), `ObligationRow.jsx`, `obligationsRules.js`, `obligationsSync.js`, `obligationsContent.js`, `obligations.css`. Route `/setup/obligations`; `backTo` is the income screen, `nextTo` is `ROUTES.setPin` (the lock offer, Steps 7c and 8c). New query key `queryKeys.obligations`. | ADOPTED |
+| Chips | Rent, Data / Airtime, Electricity, Streaming, Internet, Loan repayment, Insurance, plus Other (a bill with a typed name). The first three come from the Guide; the rest are mine. A used chip leaves the list and returns when its bill is removed. | PROPOSED [DECISION] |
+| Fields per bill | Amount and how often (Daily, Weekly, Monthly; Monthly preselected). The amount is what the bill costs each time it recurs. A suggested bill has a locked name; Other asks for one (up to 60 characters). | PROPOSED [DECISION] |
+| Skippable | Nothing is required. With an empty list the button reads "Skip for now", otherwise "Continue". | PROPOSED [DECISION] |
+| Saving | One batch on Continue: delete the removed ones, create the new ones, update the changed ones, one request at a time. It stops at the first failure and keeps track of what already succeeded, so retrying never creates a bill twice. The saved list is written into `queryKeys.obligations.list()` before navigating. | ADOPTED |
+| Back | Goes to income and discards unsaved edits. Coming back from the next screen shows what was saved. | PROPOSED |
+| Step indicator | "Step 2 of 2" (`SETUP_STEP_COUNT`). | PROPOSED |
+| Editing later | No Settings screen for obligations is planned (Guide 6), so for now this screen is the only place to edit them. | OPEN |
+| Stand-in fix | `obligationsStandIn.create` used `Date.now()` as the id, so two bills created in the same millisecond got the same id. Ids are now unique. | FIXED |
+| Stand-in scope | The stand-in stores its list in `localStorage` under one key for the whole browser profile, not per person. Two accounts on one browser share it. Acceptable while it is a stand-in; the real endpoint is per user. | OPEN |
+
+### S2a: the obligations contract (for the server work)
+
+The shapes in `src/features/setup/api/obligationsApi.js` are the contract and are unchanged by 7b. The screen additionally relies on:
+
+- `GET /obligations` returns the caller's bills in creation order (an empty array for none, never 404).
+- `POST /obligations` and `PUT /obligations/{id}` return the saved bill, including its `id`.
+- `name`: 1 to 60 characters after trimming. `amount`: above 0 and below 1,000,000,000,000, at most 2 decimals. `cadence`: `DAILY`, `WEEKLY` or `MONTHLY`. A 400 carries the message in `detail`, which the screen shows as sent.
+- Create, update and delete work on the caller's own bills only; another user's id is a 404.
+- `active` exists in the contract, but nothing in the client sets it to false yet.
+
+## Step 7c decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Offer screen | `src/features/lock/LockOffer.jsx` at `/setup/lock` (`ROUTES.setupLock`), between fixed obligations and the app. One short explanation, "Set PIN" and "Skip for now". Not counted in the step indicator. Adds a fourth lock-related screen to the Guide's inventory (Unlock, Set PIN, Change PIN); the alternative is Skip on the Set PIN screen itself. | PROPOSED [DECISION] |
+| Offered once | The offer sits at one point in the flow. After Skip for now or Set PIN, Home replaces it in the history, so Back cannot return. Afterwards the PIN is only reached from Settings, Security. | ADOPTED |
+| Hand-off to Set PIN | `navigate(ROUTES.setPin, { state: FROM_SETUP })`. Step 8c's Set PIN reads `useLocation().state?.fromSetup`: after a PIN is set it continues to the end of setup (Home), otherwise back to Settings. The router state survives a reload. | ADOPTED |
+| Skip | Goes to Home with `replace`. Step 7d replaces this with the finish routine (mark setup complete, smooth transition). | PROPOSED |
+| Back | From the offer, Back returns to fixed obligations showing what was saved. | PROPOSED |
+| Obligations | `nextTo` is now `ROUTES.setupLock` (was `ROUTES.setPin`). | CHANGED |
+| Resume gap | "Setup done" is still only "income is set" (`decideRoute`, `SetupGuard`). If the app is closed after saving income, the next launch goes to Home and skips obligations and the lock offer. A per-user "setup complete" marker would close this; it belongs with 7d. | OPEN |
+| Copy | "Ahorra will ask for your PIN each time you open it. The PIN stays on this device, and you can change this later in Settings." Depends on 8a keeping the PIN's hash on the device only (the plan's wording). | PROPOSED |
+
+## Step 7d decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Marker | `src/features/setup/setupStatus.js`: a per-person flag in localStorage, key `ahorra.setup.complete.<userId>`, value `true`. Device-local because the server only knows about income. Signing out keeps it, so signing back in does not repeat setup; a new device repeats it once (which suits the PIN offer, which is per device). | ADOPTED |
+| Finish | `useFinishSetup(homeTo)` marks setup complete and navigates to Home with `replace`. Called by "Skip for now" on the lock offer; Step 8c's Set PIN calls it after a PIN is set when opened with `state.fromSetup`. | ADOPTED |
+| Transition | The replacement uses the existing route transition (fade out then in, no slide, reduced motion respected). No special animation. | PROPOSED |
+| Resume | Income set and no marker: `decideRoute` (launch and foreground return) and `SetupGuard` (deep links) send the person to fixed obligations, which leads on to the lock offer. Someone already on a setup screen stays. Closes the 7c "resume gap". | ADOPTED |
+| First-run screens | Income, fixed obligations and the lock offer carry `firstRunOnly`. Once setup is complete, `FirstRunGuard` redirects them to Home, checked once on mount. Set PIN is not included (Settings uses it). Closes the 7a "direct visit" item. | ADOPTED |
+| Existing accounts | An account with income but no marker goes through obligations and the lock offer once on its next launch. | ACCEPTED |
+| Set PIN today | Until 8c, "Set PIN" opens a placeholder that does not finish setup, so a person who taps it and closes the app resumes at obligations. | OPEN (Step 8c) |
