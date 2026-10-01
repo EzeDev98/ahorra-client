@@ -1,0 +1,3 @@
+/* Wraps the screens so a transition can move them as one piece. Clips the sideways slide so the page never
+   gets a horizontal scrollbar while it plays. */
+.route-stage { overflow-x: clip; }

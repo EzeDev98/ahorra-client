@@ -123,3 +123,58 @@ ESLint is pinned to 9: `eslint-plugin-react` does not support ESLint 10 yet. Rev
 | Hand-over | `StartupGate` sits outside the router. When ready it rewrites the address with `history.replaceState`, mounts the router on the right screen, and fades the loading screen out over it (`--motion-base`, `--motion-reduced` when asked). Nothing navigates. | ADOPTED |
 | Paths | `StartupGate` takes `startPath`, `homeTo`, `welcomeTo` and holds no path. `App.jsx` passes literals until Step 5 supplies them from `routes.js`. | ADOPTED |
 | Dark mode | The loading screen stays white in dark mode, because it continues the white native splash. A dark-mode launch therefore fades from white to the dark first screen. | OPEN (owner) |
+
+## Step 5a decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| File | `src/app/router/routes.js` exports a frozen `ROUTES` object (every path, grouped by area) and `reportDetailPath(date)`, the only path with a parameter. No path is written as a string anywhere else; `App.jsx` and the gallery now read `ROUTES`. | ADOPTED |
+| Paths | Onboarding `/`, `/install`, `/welcome`, `/offline`; `/register`, `/verify-phone`, `/login`; `/forgot-password`, `/forgot-password/verify`, `/forgot-password/new-password`; `/setup/income`, `/setup/obligations`; `/set-pin`, `/unlock`; `/home`, `/reports`, `/reports/:date`, `/insights`, `/behavior`; `/settings` with `/income`, `/account`, `/security`, `/security/change-pin`, `/appearance`, `/about` below it. `/gallery` is dev only. | PROPOSED |
+| Set PIN | One route, `/set-pin`, used by first-run setup (7c) and Settings, Security (8c). Change PIN is separate, under Security. | PROPOSED |
+| Side panel | Not a route: it slides over Home (9m). | ADOPTED |
+
+## Step 5b decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Files | `src/app/router/`: `routeConfig.jsx` (`ROUTE_CONFIG`), `withGuards.jsx`, `AppRoutes.jsx` (builds the `<Routes>` from the config), `RoutePlaceholder.jsx`. `App.jsx` now only nests `NetworkGate`, `StartupGate`, `BrowserRouter` and `AppRoutes`. | ADOPTED |
+| Flags | Each route spreads one preset: `OPEN` (Onboarding, Install, gallery), `BEFORE_SIGN_IN` (`installed`), `SIGNED_IN` (`installed`, `authenticated`: the unlock screen), `IN_APP` (all three). Setup, Set PIN and every app screen are `IN_APP`. | PROPOSED |
+| Guards | `withGuards` enforces `installed` now. `authenticated` and `unlocked` are declared on every route and enforced from Step 5c. | ADOPTED |
+| Unbuilt screens | Every route in the plan exists in the config now, with `RoutePlaceholder` as its element, so a redirect to a screen that is not built yet cannot fall into the catch-all and loop. Each later step replaces one `soon(...)` element. | ADOPTED |
+| Catch-all | Redirects to the Onboarding route with `replace`, as the plan says. `NotFound` is no longer used by any route. | PROPOSED |
+
+## Step 5c decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Guards | `AuthGuard`, `UnlockGuard`, `SetupGuard` in `src/app/router/guards/`, next to `InstallGuard`. Each takes `redirectTo` and holds no path; `withGuards` supplies it from `ROUTES`. Order, outermost first: installed, authenticated, unlocked, setupComplete. | ADOPTED |
+| AuthGuard | No session redirects to Welcome. It watches the session, so signing out or a revoked session leaves the screen at once. | ADOPTED |
+| UnlockGuard | Reads `lockState` (`src/features/lock/`), which is never locked until Step 8 calls `lock()` and `unlock()`. Redirects to Unlock when locked. | ADOPTED |
+| SetupGuard | Reads `GET /income` through the `income.current` query. `null` (404) redirects to the income setup. A failed read shows the error screen with a retry and never sends anyone to setup. While it waits, it shows the loading screen. | PROPOSED |
+| New flag | `setupComplete`, set by the `IN_APP` preset. Setup screens and Set PIN use a new `FIRST_RUN` preset (installed, authenticated, unlocked) so they cannot redirect to themselves. | PROPOSED |
+| Loading screen | `LoadingScreen` takes `page`: same look, but below the connection notice and toasts, so a waiting guard cannot hide "needs a connection". | ADOPTED |
+| For Step 7a and 11b | Saving income must write the saved income into `queryKeys.income.current()` (`setQueryData`) before navigating on, or the guard still sees `null` and sends the person back to setup. | OPEN (carried forward) |
+
+## Step 5d decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Shape | `AnimatedRoutes` (`src/app/router/`) renders `AppRoutes` with a `location` that trails the router's. The old screen stays up, fades and slides out, then the new one fades and slides in. One screen exists at a time. `App.jsx` renders `AnimatedRoutes` in place of `AppRoutes`. | ADOPTED |
+| Timing | Exit `--motion-fast` (160 ms, `--ease-standard`), enter `--motion-base` (260 ms, `--ease-out`). Slide of 16 px, transform and opacity only, through `run()` from the motion module. Reduced motion: a plain fade (`--motion-reduced`). | PROPOSED |
+| Direction | Forward (push) slides left out, right in. Back (browser back) is mirrored. A replace, which is how redirects navigate, fades with no slide. | PROPOSED |
+| Redirects | A screen that renders nothing is swapped at once, with no exit, so redirect chains add no delay. | ADOPTED |
+| Why not overlap | A cross-fade would keep two live screens (with their guards and queries) stacked during the change. A fade-through avoids that. | ADOPTED |
+| Scroll | The page scrolls to the top when a new screen arrives. | ADOPTED |
+| Side panel | Not a route, so it is outside this wrapper: Home stays mounted underneath it (Step 9m). | ADOPTED |
+| Known limit | A screen opened with an on-screen back button (a push) slides forward, not backward; only the browser's back button is mirrored. | OPEN |
+
+## Step 5e decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Function | `decideRoute({ launching, pathname })` in `src/app/startup/decideRoute.js` replaces `decideStart`. Questions in order: installed, signed in, locked, setup done. It resolves to a path, or null (stay). | ADOPTED |
+| Launch | `StartupGate` runs it once, in step with the font and minimum-time wait. All clear gives Home; not signed in gives Welcome; locked gives Unlock; no income gives the income setup; a browser tab gives null (Onboarding stays). Applies only when the app opens at `/`. | ADOPTED |
+| Foreground return | `ResumeDecision` (inside the router) runs the same function on every return to the foreground, with `launching: false`: all clear gives null, so nobody is moved off the screen they are on. It sends someone only to Unlock (locked) or the income setup (income known to be missing). | PROPOSED |
+| Setup check | Launch reads `GET /income` through the `income.current` query, so `SetupGuard` finds it fresh. Not asked when offline; given up after 3 s. Unknown means Home, and `SetupGuard` shows its loader or error screen. A return to the foreground reads the cache only and makes no request. | PROPOSED |
+| Props | `StartupGate` no longer takes `startPath`, `homeTo` or `welcomeTo`: it sits in `src/app/` and imports `ROUTES`. | ADOPTED |
+| For Step 8 | Set the lock state to locked at boot when app lock is on, before the first render, so launch sees it. Lock on return to the foreground (8d) before `ResumeDecision`'s listener reads it, or let `UnlockGuard` react, which it does live. | OPEN (carried forward) |

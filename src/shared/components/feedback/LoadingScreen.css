@@ -10,3 +10,6 @@
 }
 
 .loading-screen .ui-logo { color: var(--color-splash-logo); }
+
+/* For a route guard that is waiting. Same look, but below the connection notice and toasts instead of over them. */
+.loading-screen--page { z-index: 1; }

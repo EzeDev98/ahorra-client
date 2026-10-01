@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { run } from '@core/motion/motion.js';
 import LoadingScreen from '@shared/components/feedback/LoadingScreen.jsx';
-import { decideStart } from './decideStart.js';
+import { ROUTES } from '@app/router/routes.js';
+import { decideRoute } from './decideRoute.js';
 
 // Fewest milliseconds the loading screen stays up, counted from when the page started loading: a fast start
 // does not flash it, and a slow start is not made slower. [PROPOSED]
@@ -16,25 +17,22 @@ async function untilReady() {
   await sleep(MIN_VISIBLE_MS - performance.now());
 }
 
-// The startup sequence (Guide §5): white native splash, then the loading screen, then one routing decision.
-// Place it OUTSIDE the router. While the loading screen shows, the router is not mounted. When ready, the decision
-// rewrites the address with history.replaceState, the router then mounts straight on the right screen, and the
-// loading screen fades out over it. Nothing navigates and nothing flashes.
-//   startPath          the launch route (Onboarding's path). The decision applies only when the app opens here;
-//                      a deep link is left to the route guards (Step 5).
-//   homeTo, welcomeTo  where the decision sends the person. Passed in so this file holds no path
-//                      (Step 5 supplies them from routes.js).
-export default function StartupGate({ startPath, homeTo, welcomeTo, children }) {
+// The startup sequence (Guide §5): white native splash, then the loading screen, then one routing decision
+// (decideRoute.js). Place it OUTSIDE the router. While the loading screen shows, the router is not mounted. When
+// ready, the answer is written to the address with history.replaceState, the router then mounts straight on the right
+// screen, and the loading screen fades out over it. Nothing navigates and nothing flashes.
+// The decision applies only when the app opens at the start route (Onboarding's path); a deep link is left to the
+// route guards.
+export default function StartupGate({ children }) {
   const [phase, setPhase] = useState('loading'); // 'loading' | 'revealing' | 'done'
-  const [launch] = useState(() => ({ startPath, homeTo, welcomeTo }));
   const screen = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
-    untilReady().then(() => {
+    // The decision starts at once, alongside the wait for the font and the minimum time, so neither delays the other.
+    Promise.all([untilReady(), decideRoute({ launching: true }).catch(() => null)]).then(([, destination]) => {
       if (cancelled) return;
-      const destination = { home: launch.homeTo, welcome: launch.welcomeTo }[decideStart()];
-      if (destination && window.location.pathname === launch.startPath) {
+      if (destination && window.location.pathname === ROUTES.onboarding) {
         window.history.replaceState(window.history.state, '', destination);
       }
       setPhase('revealing');
@@ -42,7 +40,7 @@ export default function StartupGate({ startPath, homeTo, welcomeTo, children }) 
     return () => {
       cancelled = true;
     };
-  }, [launch]);
+  }, []);
 
   // The first screen is now mounted under the loading screen. Give it one frame to paint, then fade the cover away.
   useEffect(() => {

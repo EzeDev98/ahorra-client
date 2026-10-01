@@ -5,6 +5,7 @@ import Badge from '@shared/components/ui/Badge.jsx';
 import Button from '@shared/components/ui/Button.jsx';
 import IconButton from '@shared/components/ui/IconButton.jsx';
 import TextLink from '@shared/components/ui/TextLink.jsx';
+import { ROUTES } from '@app/router/routes.js';
 
 const VARIANTS = ['primary', 'secondary', 'ghost', 'danger'];
 
@@ -46,7 +47,7 @@ export default function ButtonsSection() {
         </Sample>
         <Sample label="Links (in-app and external)">
           <Row>
-            <TextLink to="/gallery">In-app link</TextLink>
+            <TextLink to={ROUTES.gallery}>In-app link</TextLink>
             <TextLink href="https://example.com" target="_blank" rel="noreferrer">External link</TextLink>
           </Row>
         </Sample>
