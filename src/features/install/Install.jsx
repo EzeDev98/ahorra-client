@@ -33,6 +33,16 @@ export default function Install({ backTo, welcomeTo }) {
     return () => clearTimeout(timer);
   }, [promptable, prompt]);
 
+  // Catches an install finished through the browser's own UI while this page is open, which fires no appinstalled event.
+  useEffect(() => {
+    const query = window.matchMedia('(display-mode: standalone)');
+    const onChange = (event) => {
+      if (event.matches) setAccepted(true);
+    };
+    query.addEventListener('change', onChange);
+    return () => query.removeEventListener('change', onChange);
+  }, []);
+
   if (isPWAInstalled()) return <Navigate to={welcomeTo} replace />;
 
   let phase = 'waiting';

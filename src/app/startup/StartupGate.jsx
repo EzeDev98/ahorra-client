@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { run } from '@core/motion/motion.js';
 import LoadingScreen from '@shared/components/feedback/LoadingScreen.jsx';
 import { ROUTES } from '@app/router/routes.js';
+import { detectInstalledApp } from '@core/pwa/isPWAInstalled.js';
 import { decideRoute } from './decideRoute.js';
 
 // Fewest milliseconds the loading screen stays up, counted from when the page started loading: a fast start
@@ -30,7 +31,7 @@ export default function StartupGate({ children }) {
   useEffect(() => {
     let cancelled = false;
     // The decision starts at once, alongside the wait for the font and the minimum time, so neither delays the other.
-    Promise.all([untilReady(), decideRoute({ launching: true }).catch(() => null)]).then(([, destination]) => {
+    Promise.all([untilReady(), detectInstalledApp().then(() => decideRoute({ launching: true })).catch(() => null)]).then(([, destination]) => {
       if (cancelled) return;
       if (destination && window.location.pathname === ROUTES.onboarding) {
         window.history.replaceState(window.history.state, '', destination);

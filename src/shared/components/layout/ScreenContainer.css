@@ -12,6 +12,23 @@
 .ui-screen__inner {
   display: flex;
   flex-direction: column;
-  width: min(calc(var(--content-width) + var(--gutter) * 2), 100%);
+  width: min(calc(var(--screen-width) + var(--gutter) * 2), 100%);
   padding-inline: var(--gutter);
+}
+
+/* Top bar (back button or logo). Always the same height, so it sits in the same place on every screen. */
+.ui-screen__bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  height: var(--bar-height);
+}
+
+/* The one group of a centred screen: content, then its actions. The auto margins centre it in the space under
+   the bar. When it is taller than that space they shrink to zero and the screen scrolls as one piece, group intact.
+   Nothing else positions a screen vertically (Guide section 4.8). */
+.ui-screen__group {
+  display: flex;
+  flex-direction: column;
+  margin-block: auto;
 }

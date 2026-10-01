@@ -16,25 +16,26 @@ export default function Onboarding({ installTo, welcomeTo }) {
 
   return (
     <ScreenContainer className="onboarding">
-      <div className="onboarding__bar">
-        <AppLogo />
-      </div>
-      <h1 className="onboarding__title">{TAGLINE}</h1>
-      <ul className="onboarding__features">
-        {FEATURES.map(({ id, icon: Icon, title, description }) => (
-          <li key={id} className="onboarding__feature">
-            <Icon className="onboarding__icon" aria-hidden="true" />
-            <div>
-              <p className="onboarding__feature-title">{title}</p>
-              <p className="onboarding__feature-text">{description}</p>
-            </div>
-          </li>
-        ))}
-      </ul>
-      <div className="onboarding__footer">
-        <Button block onClick={() => navigate(installTo)}>
-          Get started
-        </Button>
+      <div className="ui-screen__bar" aria-hidden="true" />
+      <div className="ui-screen__group">
+        <AppLogo size="lg" className="onboarding__logo" />
+        <h1 className="onboarding__title">{TAGLINE}</h1>
+        <ul className="onboarding__features">
+          {FEATURES.map(({ id, icon: Icon, title, description }) => (
+            <li key={id} className="onboarding__feature">
+              <Icon className="onboarding__icon" aria-hidden="true" />
+              <div>
+                <p className="onboarding__feature-title">{title}</p>
+                <p className="onboarding__feature-text">{description}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <div className="onboarding__footer">
+          <Button block onClick={() => navigate(installTo)}>
+            Get started
+          </Button>
+        </div>
       </div>
     </ScreenContainer>
   );

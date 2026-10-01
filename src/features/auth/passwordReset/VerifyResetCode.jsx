@@ -96,6 +96,7 @@ export default function VerifyResetCode({ requestTo, newPasswordTo }) {
 
   return (
     <FormScreen
+      className="ui-form-screen--code"
       title={VERIFY.title}
       description={VERIFY.description(maskPhone(flow.phoneNumber))}
       onBack={() => navigate(requestTo)}

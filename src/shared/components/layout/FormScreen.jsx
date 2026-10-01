@@ -33,21 +33,23 @@ export default function FormScreen({
 
   return (
     <ScreenContainer className={cx('ui-form-screen', className)}>
-      <div className="ui-form-screen__bar">
+      <div className="ui-screen__bar">
         {onBack && <IconButton icon={ArrowLeft} label={backLabel} className="ui-form-screen__back" onClick={onBack} />}
       </div>
-      {step}
-      <header className="ui-form-screen__head">
-        <h1 className="ui-form-screen__title">{title}</h1>
-        {description && <p className="ui-form-screen__description">{description}</p>}
-      </header>
-      {onSubmit ? (
-        <form className="ui-form-screen__body" noValidate onSubmit={handleSubmit}>
-          {body}
-        </form>
-      ) : (
-        <div className="ui-form-screen__body">{body}</div>
-      )}
+      <div className="ui-screen__group">
+        {step}
+        <header className="ui-form-screen__head">
+          <h1 className="ui-form-screen__title">{title}</h1>
+          {description && <p className="ui-form-screen__description">{description}</p>}
+        </header>
+        {onSubmit ? (
+          <form className="ui-form-screen__body" noValidate onSubmit={handleSubmit}>
+            {body}
+          </form>
+        ) : (
+          <div className="ui-form-screen__body">{body}</div>
+        )}
+      </div>
     </ScreenContainer>
   );
 }

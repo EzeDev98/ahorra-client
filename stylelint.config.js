@@ -13,8 +13,19 @@ export default {
       'font-weight': ['/^var\\(--font-weight\\)$/', 'inherit'],
       '/^border(-[a-z]+)*-radius$/': ['/^var\\(--radius(-sm)?\\)$/', '0', '50%', 'inherit'],
     },
+
+    // Only the shared layout positions a screen vertically (Guide section 4.8).
+    'declaration-property-value-disallowed-list': {
+      '/^margin-(top|bottom|block|block-start|block-end)$/': ['/auto/'],
+      '/^(min-)?height$/': ['/^100d?vh$/'],
+    },
   },
   overrides: [
+    {
+      // The layout components and the page base may centre and size a screen.
+      files: ['src/shared/components/layout/*.css', 'src/styles/base.css'],
+      rules: { 'declaration-property-value-disallowed-list': null },
+    },
     {
       // Raw values live here and only here.
       files: ['src/styles/tokens.css'],

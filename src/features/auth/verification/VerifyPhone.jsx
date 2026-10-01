@@ -108,6 +108,7 @@ export default function VerifyPhone({ welcomeTo, loginTo }) {
 
   return (
     <FormScreen
+      className="ui-form-screen--code"
       title={TITLE}
       description={description(maskPhone(pending.phoneNumber))}
       onBack={() => navigate(welcomeTo)}

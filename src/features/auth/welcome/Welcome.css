@@ -1,9 +1,8 @@
-/* The logo and text sit in the middle of the free space; the two buttons stay at the bottom. */
+/* The logo, text and both buttons are one group, centred by the shared layout. */
 .welcome__body {
+  text-align: center;
   display: flex;
-  flex: 1;
   flex-direction: column;
-  justify-content: center;
   gap: var(--gutter);
 }
 

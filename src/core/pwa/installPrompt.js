@@ -3,6 +3,8 @@
 // first import in main.jsx, long before any screen mounts.
 //
 // The Install screen (Step 4g) reads this state. It is also mirrored on window.__ahorraInstall for debugging.
+import { markInstalled } from './isPWAInstalled.js';
+
 let state = { prompt: null, installed: false };
 const listeners = new Set();
 
@@ -20,7 +22,10 @@ window.addEventListener('beforeinstallprompt', (event) => {
   update({ prompt: event });
 });
 
-window.addEventListener('appinstalled', () => update({ prompt: null, installed: true }));
+window.addEventListener('appinstalled', () => {
+  markInstalled(); // the browser has just installed the app: this page now counts as installed
+  update({ prompt: null, installed: true });
+});
 
 // { prompt: BeforeInstallPromptEvent | null, installed: boolean }. A new object on every change.
 export const getInstallState = () => state;
