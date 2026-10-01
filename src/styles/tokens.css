@@ -48,6 +48,10 @@
   --color-over: light-dark(var(--p-terracotta-600), var(--p-terracotta-300));
   --color-error: light-dark(var(--p-red-600), var(--p-red-300));
 
+  /* Startup screen: white in both themes, to match the manifest background_color. */
+  --color-splash-bg: var(--p-white);
+  --color-splash-logo: var(--p-ink-600);
+
   --font-family: "Red Hat Text", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-weight: 400;
 
@@ -91,6 +95,7 @@
   --modal-width: 400px;
   --z-overlay: 80;
   --z-toast: 100;
+  --z-splash: 120;
 }
 
 /* Settings, Appearance: force a theme. No attribute means follow the system. */

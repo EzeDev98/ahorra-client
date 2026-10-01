@@ -1,12 +1,13 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
+import { ahorraServiceWorker } from './vite-plugins/ahorraServiceWorker.js';
 
 const src = (path) => fileURLToPath(new URL(`./src/${path}`, import.meta.url));
 
 // Keep these aliases in sync with jsconfig.json.
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), ahorraServiceWorker()],
   server: { port: 2051, strictPort: true },
   preview: { port: 2051, strictPort: true },
   resolve: {

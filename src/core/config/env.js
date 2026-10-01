@@ -15,4 +15,6 @@ export const env = Object.freeze({
   standIns: Object.freeze(
     (import.meta.env.VITE_STAND_INS ?? 'obligations,push,spending-plan').split(',').map((name) => name.trim()).filter(Boolean),
   ),
+  // Development only: lets a browser tab use the app without installing it. Always false in a production build.
+  skipInstallGuard: import.meta.env.DEV && import.meta.env.VITE_SKIP_INSTALL_GUARD === 'true',
 });

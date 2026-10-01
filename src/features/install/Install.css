@@ -1,0 +1,32 @@
+.install__steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gutter);
+}
+
+.install__step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gutter);
+}
+
+/* Centres the icon on the step text, which sits under the small "Step n" label. */
+.install__icon {
+  flex: none;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  margin-top: calc(var(--leading-xs) + (var(--leading-sm) - var(--icon-size)) / 2);
+  stroke-width: var(--icon-stroke);
+  color: var(--color-brand);
+}
+
+.install__step-label {
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  color: var(--color-text-muted);
+}
+
+.install__step-text {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}

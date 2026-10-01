@@ -1,0 +1,12 @@
+/* White in both themes: it continues the white native splash (manifest background_color), so the start never flashes. */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-splash);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-splash-bg);
+}
+
+.loading-screen .ui-logo { color: var(--color-splash-logo); }

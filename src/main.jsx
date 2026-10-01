@@ -1,3 +1,4 @@
+import '@core/pwa/installPrompt.js';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -11,7 +12,9 @@ import { configureHttpClient } from '@core/http/httpClient.js';
 import { clearQueryData, queryClient } from '@core/data/queryClient.js';
 import { sessionManager } from '@features/auth/session/sessionManager.js';
 import ErrorBoundary from '@shared/components/feedback/ErrorBoundary.jsx';
+import DeviceGate from '@features/device/DeviceGate.jsx';
 import App from '@app/App.jsx';
+import { registerServiceWorker } from '@core/pwa/registerServiceWorker.js';
 
 configureHttpClient({
   getAccessToken: sessionManager.getAccessToken,
@@ -24,12 +27,16 @@ sessionManager.subscribe(() => {
   if (!sessionManager.hasSession()) clearQueryData();
 });
 
+registerServiceWorker();
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <App />
-      </QueryClientProvider>
+      <DeviceGate>
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
+      </DeviceGate>
     </ErrorBoundary>
   </StrictMode>,
 );

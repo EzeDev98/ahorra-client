@@ -1,0 +1,55 @@
+/* Same bar height as FormScreen, so the logo and titles sit at the same height across screens. */
+.onboarding__bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  height: var(--bar-height);
+}
+
+.onboarding__title {
+  margin-block: var(--gutter);
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+}
+
+.onboarding__features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gutter);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.onboarding__feature {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gutter);
+}
+
+/* Centres the icon on the first line of the feature title. */
+.onboarding__icon {
+  flex: none;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  margin-top: calc((var(--leading-md) - var(--icon-size)) / 2);
+  stroke-width: var(--icon-stroke);
+  color: var(--color-brand);
+}
+
+.onboarding__feature-title {
+  font-size: var(--text-md);
+  line-height: var(--leading-md);
+}
+
+.onboarding__feature-text {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-text-muted);
+}
+
+/* margin-top: auto keeps the button at the bottom on tall screens and right under the list on short ones. */
+.onboarding__footer {
+  margin-top: auto;
+  padding-block: calc(var(--gutter) * 1.5) var(--gutter);
+}
