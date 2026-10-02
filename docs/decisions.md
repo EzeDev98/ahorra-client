@@ -430,3 +430,49 @@ The shapes in `src/features/setup/api/obligationsApi.js` are the contract and ar
 | Unsupported context | Without Web Crypto the checkbox is disabled and its hint says a PIN is not available there. | ADOPTED |
 | Layout | An inner screen: `PageHeader` with Back to Settings, content top-aligned. The centred-group rule (Guide 4.8) is for the screens before Home. | ADOPTED |
 | Turning off with the lock engaged | Not reachable: while locked, only Unlock is. "Forgot PIN? Sign in again" (8e) is the way out. | ADOPTED |
+
+## Step 9a and 9b decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Scrolling | Only the cards area scrolls; the bar, the greeting and the input stay fixed (owner decision). `.home__cards` is the scroll area. Consequences for later: Step 9i must allow dragging a card toward an edge of that area, and Step 9e's entrance slide is clipped at the top of it, so it needs a little room inside the area. | ADOPTED |
+| Greeting rules | One file, `greeting.js`, a pure function of name, device clock, mode and days observed. The words and order are exactly Guide 7.3. | ADOPTED |
+| Words around the rules | `useGreeting.js` supplies the clock (every minute and when the page becomes visible) and the mode (`GET /behavior/overview`). The sub-line stays empty until the overview has answered, so it never swaps one message for another. A failed overview just means no observation line. | PROPOSED |
+| Name | The server sends no first name (the login response and the token carry none, and there is no profile endpoint), so the greeting reads "there", as the prototype does for a blank name. Needs a server change: return `firstName` at login or add a profile endpoint (now S10, below). Home then passes it to `useGreeting`. | OPEN |
+| Day N | N is `daysObserved + 1`: the server counts closed days, so the first day has none yet and reads "Day 1". | PROPOSED |
+| Independence Day | 1 October (Nigeria). The Guide names the occasion but not the date. | PROPOSED |
+
+## Step 9c decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Request id | The id belongs to the exact text sent. A retry of the same text reuses it, so the server (which returns the entry it already made for a repeated id, verified in `CaptureServiceImpl`) cannot create a second one if the first reply was lost. Different text always gets a fresh id, because the server keeps the first text for an id. This reads "a fresh id per attempt" as per new entry. | PROPOSED |
+| Busy state | As in the prototype: the field empties and its placeholder reads "Reading your entry…". It is read-only, not disabled, so the keyboard stays up and the box does not dim. A refused entry comes back as typed. | ADOPTED |
+| Errors | The server's `detail` for a refused entry (400) shows as a quiet line under the input, in the prototype's hint style, positioned out of the flow so nothing moves. Any other failure shows the shared message. A gated day (423) shows nothing here: the shared mutation handler refreshes the gate state. | ADOPTED |
+| After success | The field clears and keeps focus (another entry can be typed at once, Guide 7.4), and the day, entries and report queries are refreshed. The card itself arrives with 9e and 9f. | ADOPTED |
+| Mic | Left as 9a built it (present, disabled) until Step 9d decides. | OPEN (Step 9d) |
+| No connection | Not handled here; Step 9n. | OPEN (Step 9n) |
+
+## Server backlog additions (S-list)
+
+### S10. Current user's first name [PROPOSED]
+Home's greeting needs the first name, and the server sends none: the login response and the access token carry no name, and there is no profile endpoint.
+- S10a. Add `GET /user/me` for any signed-in user. Response: `{ userId, username, firstName }`, from the user record.
+- S10b. No stand-in needed: until it exists the greeting reads "there".
+- S10c. Client: `userApi.getMe`, a `queryKeys.user.me()` key, and Home passes `firstName` to `useGreeting({ name })`. The Account screen (Step 11c) can use the same call for its read-only fields.
+- Why an endpoint and not a field on the login response: login happens once, while the session survives app restarts, so keeping the name from login would mean storing it on the device. The endpoint keeps it in memory only (Guide 1.1a).
+- Dependency map row: 9b Greeting needs S10; until then the greeting reads "there".
+
+## Step 9e decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Files | `PendingCard.jsx` (one card, built on `Card` and `Button`), `PendingStack.jsx` (the list, with the entrance and `flip()`), `pendingContent.js` (copy), `usePendingEntries.js`, and `shared/utils/formatMoney.js`. Card styles are appended to `Home.css`. | ADOPTED |
+| Order | The server sends pending entries oldest first (entry date, then id). The stack shows the newest on top, as the prototype does. | PROPOSED |
+| Entrance | A card that arrives after the list has loaded slides in from just above (12px, scale .98) over `--motion-base`. Cards already waiting when the list first loads appear without it. Reduced motion gives a plain fade. A card that leaves and comes back replays the entrance; 9i and 9k replace that with the fly animations. | ADOPTED |
+| Reflow | The stack keeps the list it is showing and changes it through `flip()` with `flushSync`, applied one microtask after the data changes (React does not allow `flushSync` while it is running effects). | ADOPTED |
+| Read | `usePendingEntries` reads `GET /day/status` with `staleTime: 0`. It is the first piece of 9f; 9f adds the gate fields. | PROPOSED |
+| Buttons | Later and Confirm are disabled until a handler is passed (9g, 9i), so no control does nothing. | ADOPTED |
+| Money | `₦` plus grouped digits, up to two decimals, never rounded away. The prototype rounds to whole naira. | PROPOSED |
+| Category | A missing category name shows "Other", as the prototype does. | PROPOSED |
+| Cards area | A little padding at the top of `.home__cards`, with its start moved up by the same amount, so the entrance slide is not clipped and the first card does not move (the Step 9a note). | ADOPTED |

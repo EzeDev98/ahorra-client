@@ -17,6 +17,7 @@ import ChangePin from '@features/lock/ChangePin.jsx';
 import TurnOffLock from '@features/lock/TurnOffLock.jsx';
 import SettingsSecurity from '@features/settings/security/SettingsSecurity.jsx';
 import Install from '@features/install/Install.jsx';
+import Home from '@features/home/Home.jsx';
 import RoutePlaceholder from './RoutePlaceholder.jsx';
 import { ROUTES } from './routes.js';
 
@@ -58,7 +59,7 @@ export const ROUTE_CONFIG = [
   { path: ROUTES.setPin, ...FIRST_RUN, element: <SetPin offerTo={ROUTES.setupLock} securityTo={ROUTES.settingsSecurity} changePinTo={ROUTES.changePin} homeTo={ROUTES.home} /> },
   { path: ROUTES.unlock, ...SIGNED_IN, element: <Unlock homeTo={ROUTES.home} /> },
 
-  { path: ROUTES.home, ...IN_APP, element: soon('Home') },
+  { path: ROUTES.home, ...IN_APP, element: <Home /> },
   { path: ROUTES.reports, ...IN_APP, element: soon('Reports') },
   { path: ROUTES.reportDetail, ...IN_APP, element: soon('Report') },
   { path: ROUTES.insights, ...IN_APP, element: soon('Insights') },

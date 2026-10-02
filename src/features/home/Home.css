@@ -1,0 +1,116 @@
+/* The bar is the top safe area plus the normal bar height; the stage is everything under it. */
+.home {
+  --home-bar: calc(var(--bar-height) + env(safe-area-inset-top));
+  padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+}
+
+.home__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--home-bar);
+  padding: env(safe-area-inset-top) calc(var(--gutter) - var(--gap) / 2) 0;
+}
+
+.home__stage {
+  position: relative;
+  height: calc(100dvh - var(--home-bar));
+}
+
+/* The three things on the stage share one column, centred. */
+.home__greeting,
+.home__composer,
+.home__cards {
+  position: absolute;
+  inset-inline: 0;
+  margin-inline: auto;
+  width: min(var(--screen-width), calc(100% - var(--gutter) * 2));
+}
+
+/* The input line is the fixed point: half the stage down, centred on that line. */
+.home__composer {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Under the input without taking any space, so a message can come and go and the input never moves. */
+.home__hint {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(100% + var(--gap) * 0.75);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  color: var(--color-text-muted);
+}
+
+/* Anchored above the input, so a longer or shorter greeting grows upward and the input stays put. */
+.home__greeting {
+  bottom: calc(50% + var(--input-height) / 2 + var(--gutter) * 1.5);
+  text-align: center;
+}
+
+.home__greeting-title {
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+}
+
+.home__greeting-sub {
+  min-height: var(--leading-sm);
+  margin-top: calc(var(--gap) / 2);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-text-muted);
+}
+
+/* Starts under the input and runs to the bottom of the stage. Only this area scrolls: the bar, the greeting and the
+   input stay where they are. */
+.home__cards {
+  top: calc(50% + var(--input-height) / 2 + var(--gutter) * 2 - var(--gap) * 1.5);
+  bottom: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  padding-top: calc(var(--gap) * 1.5);
+  padding-bottom: calc(var(--gutter) * 6);
+}
+
+/* A pending card. The surface, border and padding come from Card. */
+.home__card {
+  flex: none;
+}
+
+.home__card-meta {
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  color: var(--color-text-muted);
+}
+
+.home__card-rows {
+  margin-top: calc(var(--gap) * 0.75);
+}
+
+.home__card-rows li,
+.home__card-total {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--gap);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+
+.home__card-total {
+  margin-top: calc(var(--gap) * 0.75);
+  padding-top: calc(var(--gap) * 0.75);
+  border-top: var(--border-width) solid var(--color-line);
+  font-size: var(--text-md);
+  line-height: var(--leading-md);
+}
+
+.home__card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--gap);
+  margin-top: calc(var(--gap) * 1.25);
+}
