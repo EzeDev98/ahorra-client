@@ -11,6 +11,11 @@ import Welcome from "@features/auth/welcome/Welcome.jsx";
 import SetupIncome from '@features/setup/income/SetupIncome.jsx';
 import SetupObligations from '@features/setup/obligations/SetupObligations.jsx';
 import LockOffer from '@features/lock/LockOffer.jsx';
+import Unlock from '@features/lock/Unlock.jsx';
+import SetPin from '@features/lock/SetPin.jsx';
+import ChangePin from '@features/lock/ChangePin.jsx';
+import TurnOffLock from '@features/lock/TurnOffLock.jsx';
+import SettingsSecurity from '@features/settings/security/SettingsSecurity.jsx';
 import Install from '@features/install/Install.jsx';
 import RoutePlaceholder from './RoutePlaceholder.jsx';
 import { ROUTES } from './routes.js';
@@ -50,8 +55,8 @@ export const ROUTE_CONFIG = [
   { path: ROUTES.setupObligations, ...SETUP_SCREEN, element: <SetupObligations backTo={ROUTES.setupIncome} nextTo={ROUTES.setupLock} /> },
   { path: ROUTES.setupLock, ...SETUP_SCREEN, element: <LockOffer backTo={ROUTES.setupObligations} setPinTo={ROUTES.setPin} homeTo={ROUTES.home} /> },
 
-  { path: ROUTES.setPin, ...FIRST_RUN, element: soon('Set PIN') },
-  { path: ROUTES.unlock, ...SIGNED_IN, element: soon('Unlock') },
+  { path: ROUTES.setPin, ...FIRST_RUN, element: <SetPin offerTo={ROUTES.setupLock} securityTo={ROUTES.settingsSecurity} changePinTo={ROUTES.changePin} homeTo={ROUTES.home} /> },
+  { path: ROUTES.unlock, ...SIGNED_IN, element: <Unlock homeTo={ROUTES.home} /> },
 
   { path: ROUTES.home, ...IN_APP, element: soon('Home') },
   { path: ROUTES.reports, ...IN_APP, element: soon('Reports') },
@@ -62,8 +67,9 @@ export const ROUTE_CONFIG = [
   { path: ROUTES.settings, ...IN_APP, element: soon('Settings') },
   { path: ROUTES.settingsIncome, ...IN_APP, element: soon('Income') },
   { path: ROUTES.settingsAccount, ...IN_APP, element: soon('Account') },
-  { path: ROUTES.settingsSecurity, ...IN_APP, element: soon('Security') },
-  { path: ROUTES.changePin, ...IN_APP, element: soon('Change PIN') },
+  { path: ROUTES.settingsSecurity, ...IN_APP, element: <SettingsSecurity backTo={ROUTES.settings} setPinTo={ROUTES.setPin} lockOffTo={ROUTES.lockOff} changePinTo={ROUTES.changePin} /> },
+  { path: ROUTES.changePin, ...IN_APP, element: <ChangePin securityTo={ROUTES.settingsSecurity} setPinTo={ROUTES.setPin} /> },
+  { path: ROUTES.lockOff, ...IN_APP, element: <TurnOffLock securityTo={ROUTES.settingsSecurity} /> },
   { path: ROUTES.settingsAppearance, ...IN_APP, element: soon('Appearance') },
   { path: ROUTES.settingsAbout, ...IN_APP, element: soon('About') },
 

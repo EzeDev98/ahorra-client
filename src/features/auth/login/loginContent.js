@@ -23,4 +23,8 @@ export const SESSION_ENDED = {
     title: 'Your session expired',
     text: 'Please sign in again to continue.',
   },
+  forgotPin: {
+    title: 'App lock is off',
+    text: 'You signed out because you forgot your PIN. Sign in to continue. You can set a new PIN in Settings.',
+  },
 };

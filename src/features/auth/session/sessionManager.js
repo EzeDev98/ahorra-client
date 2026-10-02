@@ -61,10 +61,10 @@ function handleSessionRevoked(error) {
 }
 
 // Clears the local session first so the app responds at once, then tells the server on a best-effort basis.
-async function signOut() {
+async function signOut(reason = null) {
   const session = tokenStore.get();
   let token = session?.accessToken;
-  endLocal(null);
+  endLocal(reason);
   if (!token) return;
   try {
     // The server only accepts a sign-out with a live access token. If it has run out, get a new one first.

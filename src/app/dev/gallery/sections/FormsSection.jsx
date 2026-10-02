@@ -76,6 +76,11 @@ export default function FormsSection() {
             />
           </FormField>
         </Sample>
+        <Sample label="OtpField, masked (PIN)">
+          <FormField label="PIN">
+            <OtpField value="123" onChange={() => {}} masked />
+          </FormField>
+        </Sample>
         <Sample label="OtpField, disabled">
           <FormField label="Verification code">
             <OtpField value="123" onChange={() => {}} disabled />

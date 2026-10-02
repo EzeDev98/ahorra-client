@@ -1,5 +1,4 @@
-// Whether the app is locked right now. Step 8 (app lock) decides when it locks and unlocks and calls lock() and unlock().
-// Until then it is never locked, so UnlockGuard lets every screen through.
+// Whether the app is locked right now. autoLock.js decides when it locks (Step 8d); Unlock.jsx unlocks it.
 let locked = false;
 const listeners = new Set();
 

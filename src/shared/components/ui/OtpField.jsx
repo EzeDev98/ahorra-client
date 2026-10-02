@@ -6,6 +6,7 @@ import { cx } from '@shared/utils/classNames.js';
 const onlyDigits = (text) => text.replace(/\D/g, '');
 
 // value: the digits typed so far, as a string. onChange(nextString). onComplete(code) fires when all boxes are filled.
+// masked shows dots instead of digits, for a PIN. It also stops the browser offering a one-time code.
 export default function OtpField({
   value = '',
   onChange,
@@ -14,6 +15,7 @@ export default function OtpField({
   invalid,
   disabled = false,
   autoFocus = false,
+  masked = false,
   className,
 }) {
   const field = useFormField();
@@ -83,10 +85,10 @@ export default function OtpField({
           }}
           id={index === 0 ? field.id : undefined}
           className={cx('ui-otp__box', isInvalid && 'ui-otp__box--invalid')}
-          type="text"
+          type={masked ? 'password' : 'text'}
           inputMode="numeric"
           pattern="[0-9]*"
-          autoComplete={index === 0 ? 'one-time-code' : 'off'}
+          autoComplete={masked || index > 0 ? 'off' : 'one-time-code'}
           autoFocus={autoFocus && index === 0}
           disabled={disabled}
           aria-label={`Digit ${index + 1} of ${length}`}

@@ -177,7 +177,7 @@ ESLint is pinned to 9: `eslint-plugin-react` does not support ESLint 10 yet. Rev
 | Foreground return | `ResumeDecision` (inside the router) runs the same function on every return to the foreground, with `launching: false`: all clear gives null, so nobody is moved off the screen they are on. It sends someone only to Unlock (locked) or the income setup (income known to be missing). | PROPOSED |
 | Setup check | Launch reads `GET /income` through the `income.current` query, so `SetupGuard` finds it fresh. Not asked when offline; given up after 3 s. Unknown means Home, and `SetupGuard` shows its loader or error screen. A return to the foreground reads the cache only and makes no request. | PROPOSED |
 | Props | `StartupGate` no longer takes `startPath`, `homeTo` or `welcomeTo`: it sits in `src/app/` and imports `ROUTES`. | ADOPTED |
-| For Step 8 | Set the lock state to locked at boot when app lock is on, before the first render, so launch sees it. Lock on return to the foreground (8d) before `ResumeDecision`'s listener reads it, or let `UnlockGuard` react, which it does live. | OPEN (carried forward) |
+| For Step 8 | Set the lock state to locked at boot when app lock is on, before the first render, so launch sees it. Lock on return to the foreground (8d) before `ResumeDecision`'s listener reads it, or let `UnlockGuard` react, which it does live. | DONE in Step 8d |
 
 ## Step 6a decisions
 
@@ -344,3 +344,89 @@ The shapes in `src/features/setup/api/obligationsApi.js` are the contract and ar
 | First-run screens | Income, fixed obligations and the lock offer carry `firstRunOnly`. Once setup is complete, `FirstRunGuard` redirects them to Home, checked once on mount. Set PIN is not included (Settings uses it). Closes the 7a "direct visit" item. | ADOPTED |
 | Existing accounts | An account with income but no marker goes through obligations and the lock offer once on its next launch. | ACCEPTED |
 | Set PIN today | Until 8c, "Set PIN" opens a placeholder that does not finish setup, so a person who taps it and closes the app resumes at obligations. | OPEN (Step 8c) |
+
+## Step 8a decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Module | `src/features/lock/pinStore.js`: `isSupported`, `has`, `getLength`, `set(pin)`, `verify(pin)`, `remove`, `subscribe`, plus the `PIN_LENGTH` constant. Screens (8b, 8c, 8f) use only this; nothing else touches the stored record. | ADOPTED |
+| Storage location | localStorage, key `ahorra.lock.pin.<userId>`. Synchronous, so the launch decision stays simple, and it matches the session and setup flag. IndexedDB offers no real extra protection against someone who can read the device. | PROPOSED [DECISION] |
+| Hashing | PBKDF2-HMAC-SHA-256 from Web Crypto, random 16-byte salt per PIN, 256-bit result, no extra dependency. Argon2 or scrypt would need a WebAssembly library and add almost nothing for a 6-digit PIN. The record stores the algorithm and iteration count, so both can change later. | PROPOSED [DECISION] |
+| Iterations | 310,000. About 140 ms on a desktop CPU, so roughly 0.4 to 0.9 s on a phone, which the Unlock screen shows as busy. | PROPOSED [DECISION] |
+| PIN length | 6 digits (`PIN_LENGTH`), the same as the SMS code boxes. The record stores its own length so a later change never strands an existing PIN. | PROPOSED [DECISION] |
+| Never stored or sent | The PIN itself is never written anywhere, kept in state after use, or sent to the server. Only the salt, the hash and the parameters are stored. | ADOPTED |
+| Threat model | A screen lock, not encryption. Someone who can read this device's storage can still brute-force a 6-digit PIN offline, so the attempt limit (8b) is friction against casual access only (Guide 6.3). | ADOPTED |
+| Per person | One PIN per account on this device. A normal sign-out keeps it. "Forgot PIN? Sign in again" (8e) must call `pinStore.remove()` before signing out, otherwise the person would be locked out by a PIN they cannot remember. | ADOPTED |
+| Secure context | Web Crypto exists only on HTTPS or localhost. On plain http, `isSupported()` is false and `set` refuses; Set PIN (8c) should say so instead of failing silently. | ADOPTED |
+| Attempts | Not stored here. Step 8b decides the policy and adds the counters to the same record (additive fields). | OPEN (Step 8b) |
+
+## Step 8b decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Unlock screen | `src/features/lock/Unlock.jsx` at `/unlock`, built on `FormScreen`: title, one line, six masked boxes. Verifies automatically when the sixth digit is typed; no button, no Back. | ADOPTED |
+| Wrong-PIN policy | Every 5th wrong PIN in a row starts a wait: 30 s, then 60, 120, 240, 480, capped at 15 min. A right PIN clears the count; during a wait the PIN is not checked. The count lives in the stored record, so closing the app does not reset it. No automatic sign-out. Tested in Node with a controllable clock. | PROPOSED [DECISION] |
+| What the policy is for | Friction against casual access, not a barrier: someone who can edit this device's storage can reset the count (same threat model as 8a). | ADOPTED |
+| Feedback | Wrong PIN: "Wrong PIN. N attempts left." with a short shake and the boxes cleared. During a wait the message stays still and a separate line counts down (so a screen reader is not interrupted every second). | PROPOSED |
+| `pinStore.verify` | Now resolves `{ ok, attemptsLeft, lockedUntil }` (was a boolean). New `getAttempts()`. A wrong-length PIN, no PIN, or an unsupported context is not ok and is not counted. | CHANGED |
+| Returning | `UnlockGuard` and the resume-from-background check pass the current path as router state `from`. A right PIN unlocks and goes back there; with no `from` (a cold start) it goes to Home. `from` is trusted only if it is an address inside the app. | ADOPTED |
+| Masked input | `OtpField` takes `masked` (dots, no one-time-code autofill). Shown in the gallery. | ADOPTED |
+| No PIN stored | If the screen opens with no PIN stored (turned off in another tab) it unlocks and moves on. | ADOPTED |
+| Biometrics | NOT SHIPPED. The Web Authentication API can reach Face ID, Touch ID and fingerprint on iOS (including installed home-screen apps), Android and desktop, using a local platform credential. It cannot be called reliable without testing on your own phone (prompts, passkey-save sheets, reinstall behaviour), and with no server it would only be a screen gate like the PIN. Follow-up: a dev-only probe to try on your phone before deciding. | OPEN [OWNER VERIFIES] |
+| Escape from a wait | "Forgot PIN? Sign in again" is Step 8e. Until then a person in a wait can only wait; nobody can be locked before 8d anyway. | ANSWERED in Step 8e |
+
+## Step 8c decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Structure | `src/features/lock/PinFlow.jsx` is one engine with two step lists: Set (create, confirm) and Change (current, create, confirm). `SetPin.jsx` (`/set-pin`) and `ChangePin.jsx` (`/settings/security/change-pin`) wrap it with their destinations, passed in from `routeConfig.jsx`. Copy in `lockContent.js` (`PIN_FLOW`). | ADOPTED |
+| Steps | One screen whose content changes; each step slides in (reduced motion: fade). Back on "confirm" returns to "create" and clears it; Back on the first step leaves the flow. A mismatch shakes, clears and stays on "confirm". | PROPOSED |
+| The new PIN | Held in a ref in memory only while it is being confirmed; stored (hashed, via `pinStore.set`) only when both entries match; never logged or kept after. | ADOPTED |
+| Current PIN | Checked with `pinStore.verify`, so the 8b attempt policy and wait apply to Change PIN too. | ADOPTED |
+| Setup mode | `state.fromSetup` (from 7c) shows "Skip for now". Setting a PIN and skipping both call `useFinishSetup`, which marks setup complete and goes Home (7d). Back returns to the lock offer. | ADOPTED |
+| Settings mode | After setting or changing, replaces the screen with Settings, Security (a placeholder until Step 11). Toasts: "App lock is on." and "PIN changed." | PROPOSED |
+| Existing PIN | Set PIN with a PIN stored: from Settings it redirects to Change PIN (replacing a PIN without the old one would defeat the lock); from setup the lock is already on, so setup finishes. Change PIN with no PIN redirects to Set PIN. Checked once on mount. | ADOPTED |
+| Weak PINs | Not blocked (for example 000000). Fits the casual-access threat model (8a). | OPEN |
+| Unsupported | Without Web Crypto (plain http) a screen says the PIN is not available in this context, with Back. | ADOPTED |
+| Locking | Setting a PIN does not lock the app at that moment. When it locks is Step 8d. | ANSWERED in Step 8d |
+| Shared shake | `pinMotion.js` holds the shake keyframes; `Unlock.jsx` now imports it instead of its own copy. | CHANGED |
+
+## Step 8d decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Leaving the app | Going to the background (another app, another tab, screen off, window minimised) locks the app at once, so the PIN is asked on return. | AGREED (owner, 1 Oct 2026) |
+| Idle | An open app with no tap, key press, scroll or touch for 5 minutes locks itself. Moving the mouse alone does not count as use. | AGREED (owner, 1 Oct 2026) |
+| Cold start | `startAutoLock()` runs in `main.jsx` before the first render. A signed-in person with a PIN starts locked, so `decideRoute` at launch finds the lock and sends them to Unlock. This closes the open item carried forward from Step 5e. | ADOPTED |
+| Who it applies to | Only a signed-in person with a PIN stored (`pinStore.has()`). Without one, nothing ever locks. | ADOPTED |
+| Where the numbers live | `AWAY_LOCK_MS` (0) and `IDLE_LOCK_MS` (5 minutes) at the top of `src/features/lock/autoLock.js`. A value above 0 for `AWAY_LOCK_MS` locks on return instead of on leaving. | ADOPTED |
+| What is covered | Locking sets `lockState`; `UnlockGuard` reacts live and replaces the screen with Unlock, so Home is unmounted and pending entries are not on screen while locked. | ADOPTED |
+| After sign-in | A fresh sign-in does not ask for the PIN straight away (the person just proved who they are). The first lock comes from leaving or idling. | PROPOSED |
+| Sign-out | Any session end (sign-out, expiry, revocation) unlocks, so the next sign-in starts unlocked and nobody meets Unlock without a session. | ADOPTED |
+| Setting a PIN | Setting a PIN does not lock the app at that moment (answers the open item in 8c). | ADOPTED |
+| App switcher preview | The operating system may take its preview picture of the app at the instant it leaves the foreground, before the lock screen is drawn. Not covered. A privacy cover for that moment is a possible later addition. | OPEN |
+| Forgot PIN | The lock now really engages, so a person who forgets the PIN has no way out until Step 8e ("Forgot PIN? Sign in again"). Build 8e next. | OPEN (Step 8e) |
+
+## Step 8e decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| What it does | "Forgot PIN? Sign in again" on the Unlock screen removes the PIN from this device (`pinStore.remove()`), then signs out. No reset flow, because the PIN guards only the screen and encrypts nothing (Guide 6.3). | ADOPTED |
+| Order | The PIN is removed first, because it is stored under the signed-in person's id and `pinStore` cannot find it once the session is gone. | ADOPTED |
+| Landing on Login | `sessionManager.signOut(reason)` now takes an optional reason, and `Unlock` passes `'forgotPin'`. A session that ends with a reason sends `AuthGuard` to Login rather than Welcome, so there is no navigation to race with the guard. `signOut()` without a reason is unchanged. | ADOPTED |
+| Message on Login | `SESSION_ENDED.forgotPin` in `loginContent.js`: "App lock is off ... You can set a new PIN in Settings." Login already shows a banner for any reason it has copy for. | PROPOSED |
+| No confirmation | One tap does it. Signing out loses nothing: entries are on the server, and the person can set a PIN again. | PROPOSED |
+| Present during a wait | The link shows during a wrong-PIN wait too, which answers the open item in 8b: nobody is stuck behind a wait. | ADOPTED |
+| Control | A ghost Button, not a link: it is an action, not navigation (see `TextLink`). It shows the busy spinner while signing out. | ADOPTED |
+
+## Step 8f decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Where | The Security screen (`/settings/security`, `SettingsSecurity.jsx`) is built now, because the checkbox lives on it. It replaces the placeholder and covers the Security part of Step 11d. The Settings hub it returns to (11a) is still a placeholder. | ADOPTED |
+| Checkbox | "Lock Ahorra with a PIN". It shows whether a PIN is stored (`pinStore.has`, read live) and never flips by itself: ticking goes to Set PIN, unticking goes to the screen that asks for the PIN. It follows the stored PIN when the person comes back. | ADOPTED |
+| Turning off | `/settings/security/lock-off` (`TurnOffLock.jsx`) asks for the current PIN with the same engine as Change PIN (`PinFlow`, mode `off`, one step), so the wrong-PIN policy and wait apply. Then `pinStore.remove()`, the toast "App lock is off.", and back to Security. Without a PIN it just returns to Security. | ADOPTED |
+| Change PIN | A secondary button under the checkbox, shown only while the lock is on. | PROPOSED |
+| Unsupported context | Without Web Crypto the checkbox is disabled and its hint says a PIN is not available there. | ADOPTED |
+| Layout | An inner screen: `PageHeader` with Back to Settings, content top-aligned. The centred-group rule (Guide 4.8) is for the screens before Home. | ADOPTED |
+| Turning off with the lock engaged | Not reachable: while locked, only Unlock is. "Forgot PIN? Sign in again" (8e) is the way out. | ADOPTED |

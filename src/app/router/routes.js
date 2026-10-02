@@ -37,6 +37,7 @@ export const ROUTES = Object.freeze({
   settingsAccount: '/settings/account',
   settingsSecurity: '/settings/security',
   changePin: '/settings/security/change-pin',
+  lockOff: '/settings/security/lock-off',
   settingsAppearance: '/settings/appearance',
   settingsAbout: '/settings/about',
 
