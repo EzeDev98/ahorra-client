@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Bell, Menu } from 'lucide-react';
 import './Home.css';
 import Badge from '@shared/components/ui/Badge.jsx';
@@ -9,6 +9,7 @@ import { gateNote } from './gate.js';
 import { BELL_LABEL } from './pendingContent.js';
 import { parkedEntries, useParked } from './parkedEntries.js';
 import PendingStack from './PendingStack.jsx';
+import SidePanel from './SidePanel.jsx';
 import useBellPeek from './useBellPeek.js';
 import useGreeting from './useGreeting.js';
 import useDayStatus from './useDayStatus.js';
@@ -18,11 +19,12 @@ import useGateWatch from './useGateWatch.js';
 // of the stage, the greeting is anchored above it and the cards below it, so nothing that appears later can move the input.
 // Built in steps: 9a this skeleton, 9b the greeting words, 9c the composer, 9e to 9l the cards, the bell and the gate,
 // 9m the side panel.
-export default function Home() {
+export default function Home({ destinations }) {
   const { title, subtitle } = useGreeting();
   const { status, loadFailed, retrying, retry } = useDayStatus();
   const parked = useParked();
   const peek = useBellPeek();
+  const [menuOpen, setMenuOpen] = useState(false);
   const gated = Boolean(status?.gated);
   const note = gateNote(status);
   useGateWatch(status);
@@ -49,7 +51,7 @@ export default function Home() {
   return (
     <div className="home">
       <header className="home__bar">
-        <IconButton icon={Menu} label="Open menu" />
+        <IconButton icon={Menu} label="Open menu" aria-haspopup="dialog" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)} />
         <div className="home__bell">
           <IconButton icon={Bell} label={waiting ? BELL_LABEL.waiting(waiting) : BELL_LABEL.empty} data-bell onClick={openBell}>
             <Badge count={waiting} floating />
@@ -64,6 +66,7 @@ export default function Home() {
         <Composer gated={gated} />
         <PendingStack entries={visible} gated={gated} note={note} loadFailed={loadFailed} retrying={retrying} onRetry={retry} />
       </main>
+      <SidePanel open={menuOpen} gated={gated} destinations={destinations} onClose={() => setMenuOpen(false)} />
     </div>
   );
 }

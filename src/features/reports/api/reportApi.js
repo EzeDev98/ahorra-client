@@ -10,7 +10,7 @@ export const reportApi = {
   getAmbient: () => httpClient.get('/report/ambient'),
 
   // GET /report/daily?from=&to=   (dates 'yyyy-MM-dd'; both optional, default is the last 30 days)
-  // out: DailyReportSummary[], newest first. Field list: confirm from Swagger when Step 10b is built.
+  // out: DailyReportSummary[], newest first. { date, kind: 'NO_ENTRIES' | 'STANDARD', entryCount, daySpend, verdict, summary }.
   listDaily: ({ from, to } = {}) => httpClient.get('/report/daily', { params: { from, to } }),
 
   // GET /report/daily/latest

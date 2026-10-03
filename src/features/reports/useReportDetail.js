@@ -1,0 +1,26 @@
+import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '@core/data/queryKeys.js';
+import { reportApi } from './api/reportApi.js';
+
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+
+// GET /report/daily/{date}: one stored report in full. A date that is not yyyy-MM-dd is never sent to the server.
+//   report      the report, or undefined until the first answer.
+//   isPending   no answer yet: show the spinner.
+//   notFound    no report exists for that day (the server answers 404), or the date in the address is not a date.
+//   loadFailed  the load failed for another reason and there is nothing to show.
+//   retrying    a retry is in flight.
+export default function useReportDetail(date) {
+  const valid = DAY.test(date ?? '');
+  const query = useQuery({ queryKey: queryKeys.report.detail(date), queryFn: () => reportApi.getDaily(date), enabled: valid });
+  const notFound = !valid || (query.isError && Boolean(query.error?.isNotFound));
+
+  return {
+    report: query.data,
+    isPending: valid && query.isPending,
+    notFound,
+    loadFailed: query.isError && !query.data && !notFound,
+    retrying: query.isFetching,
+    retry: () => query.refetch(),
+  };
+}

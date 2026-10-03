@@ -18,8 +18,12 @@ import TurnOffLock from '@features/lock/TurnOffLock.jsx';
 import SettingsSecurity from '@features/settings/security/SettingsSecurity.jsx';
 import Install from '@features/install/Install.jsx';
 import Home from '@features/home/Home.jsx';
+import Reports from '@features/reports/Reports.jsx';
+import Behavior from '@features/behavior/Behavior.jsx';
+import Insights from '@features/insights/Insights.jsx';
+import ReportDetail from '@features/reports/ReportDetail.jsx';
 import RoutePlaceholder from './RoutePlaceholder.jsx';
-import { ROUTES } from './routes.js';
+import { ROUTES, reportDetailPath } from './routes.js';
 
 // Every route as data: a path from ROUTES, the screen, and the guards it needs (see withGuards.jsx).
 //   installed       the app must be running installed, not in a browser tab (InstallGuard, Step 4e)
@@ -59,11 +63,11 @@ export const ROUTE_CONFIG = [
   { path: ROUTES.setPin, ...FIRST_RUN, element: <SetPin offerTo={ROUTES.setupLock} securityTo={ROUTES.settingsSecurity} changePinTo={ROUTES.changePin} homeTo={ROUTES.home} /> },
   { path: ROUTES.unlock, ...SIGNED_IN, element: <Unlock homeTo={ROUTES.home} /> },
 
-  { path: ROUTES.home, ...IN_APP, element: <Home /> },
-  { path: ROUTES.reports, ...IN_APP, element: soon('Reports') },
-  { path: ROUTES.reportDetail, ...IN_APP, element: soon('Report') },
-  { path: ROUTES.insights, ...IN_APP, element: soon('Insights') },
-  { path: ROUTES.behavior, ...IN_APP, element: soon('Behaviour') },
+  { path: ROUTES.home, ...IN_APP, element: <Home destinations={{ reports: ROUTES.reports, insights: ROUTES.insights, behavior: ROUTES.behavior, settings: ROUTES.settings }} /> },
+  { path: ROUTES.reports, ...IN_APP, element: <Reports backTo={ROUTES.home} detailTo={reportDetailPath} /> },
+  { path: ROUTES.reportDetail, ...IN_APP, element: <ReportDetail backTo={ROUTES.reports} /> },
+  { path: ROUTES.insights, ...IN_APP, element: <Insights backTo={ROUTES.home} incomeTo={ROUTES.settingsIncome} /> },
+  { path: ROUTES.behavior, ...IN_APP, element: <Behavior backTo={ROUTES.home} /> },
 
   { path: ROUTES.settings, ...IN_APP, element: soon('Settings') },
   { path: ROUTES.settingsIncome, ...IN_APP, element: soon('Income') },

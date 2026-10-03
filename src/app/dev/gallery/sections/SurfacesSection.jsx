@@ -1,6 +1,7 @@
 import { Inbox } from 'lucide-react';
 import { Row, Sample, Section } from '../Section.jsx';
 import Badge from '@shared/components/ui/Badge.jsx';
+import Bar from '@shared/components/ui/Bar.jsx';
 import Button from '@shared/components/ui/Button.jsx';
 import Card from '@shared/components/ui/Card.jsx';
 import DetailRow from '@shared/components/ui/DetailRow.jsx';
@@ -47,6 +48,14 @@ export default function SurfacesSection() {
             <Badge count={12} />
             <Badge count={120} />
           </Row>
+        </Sample>
+        <Sample label="Bar (brand, over, under, muted)">
+          <div className="gallery__stack">
+            <Bar value={40} max={100} label="40 percent" />
+            <Bar value={90} max={100} tone="over" label="90 percent" />
+            <Bar value={60} max={100} tone="under" label="60 percent" />
+            <Bar value={25} max={100} tone="muted" label="25 percent" />
+          </div>
         </Sample>
         <Sample label="Spinner (sm, md)">
           <Row>
