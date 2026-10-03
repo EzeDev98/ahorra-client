@@ -29,3 +29,9 @@
   opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
+
+/* Focusing a box selects its digit so typing replaces it. The selection itself is not drawn. */
+.ui-otp__box::selection {
+  background: transparent;
+  color: inherit;
+}

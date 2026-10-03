@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import './OtpField.css';
 import { useFormField } from './formFieldContext.js';
 import { cx } from '@shared/utils/classNames.js';
@@ -20,11 +20,17 @@ export default function OtpField({
 }) {
   const field = useFormField();
   const boxes = useRef([]);
+  // The newest value, kept current at once. A box focused straight after a change must see it, or focus is sent back.
+  const latest = useRef(value);
+  useEffect(() => {
+    latest.current = value;
+  }, [value]);
   const isInvalid = invalid ?? field.invalid ?? false;
 
   const focusBox = (index) => boxes.current[Math.max(0, Math.min(index, length - 1))]?.focus();
 
   const commit = (next) => {
+    latest.current = next;
     onChange?.(next);
     if (next.length === length) onComplete?.(next);
   };
@@ -72,7 +78,7 @@ export default function OtpField({
   const handleFocus = (index, event) => {
     event.target.select();
     // Never leave a gap: focus the first empty box instead.
-    if (index > value.length) focusBox(value.length);
+    if (index > latest.current.length) focusBox(latest.current.length);
   };
 
   return (

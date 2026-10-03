@@ -101,6 +101,7 @@ export default function Unlock({ homeTo }) {
 
   return (
     <FormScreen
+      className="ui-form-screen--code"
       title={UNLOCK.title}
       description={UNLOCK.description(PIN_LENGTH)}
       footer={

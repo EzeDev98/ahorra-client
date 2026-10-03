@@ -43,3 +43,21 @@
   flex: none;
   color: var(--color-text-muted);
 }
+
+/* The browser paints saved or autofilled values with its own tint, which a normal background cannot override. Paint over
+   it with the surface colour and keep the text colour, so an autofilled field looks like any other. */
+.ui-control__input:-webkit-autofill,
+.ui-control__input:-webkit-autofill:hover,
+.ui-control__input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 var(--input-height) var(--color-surface) inset;
+  -webkit-text-fill-color: var(--color-text);
+  caret-color: var(--color-text);
+}
+
+.ui-control__input:autofill,
+.ui-control__input:autofill:hover,
+.ui-control__input:autofill:focus {
+  box-shadow: 0 0 0 var(--input-height) var(--color-surface) inset;
+  -webkit-text-fill-color: var(--color-text);
+  caret-color: var(--color-text);
+}

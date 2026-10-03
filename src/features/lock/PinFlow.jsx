@@ -153,7 +153,7 @@ export default function PinFlow({ mode, onBack, onDone, onSkip }) {
 
   return (
     <div ref={stage}>
-      <FormScreen title={copy[step].title} description={text(copy[step].description)} onBack={back} footer={footer}>
+      <FormScreen className="ui-form-screen--code" title={copy[step].title} description={text(copy[step].description)} onBack={back} footer={footer}>
         <FormField label={PIN_FLOW.label} error={message}>
           <div ref={boxes}>
             <OtpField value={code} onChange={change} onComplete={submit} length={PIN_LENGTH} disabled={busy || waiting} masked />
