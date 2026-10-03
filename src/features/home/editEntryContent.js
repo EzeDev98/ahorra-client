@@ -1,0 +1,35 @@
+// All edit-sheet copy lives here, so changing a word never means touching the component.
+import { FLOW_LABEL } from './pendingContent.js';
+
+export const SHEET = {
+  title: 'Edit entry',
+  cancel: 'Cancel',
+  confirm: 'Confirm',
+};
+
+export const LABELS = {
+  flow: 'Type',
+  vendor: 'Vendor',
+  date: 'Date',
+  items: 'Items',
+  item: (number) => `Item ${number}`,
+  amount: 'Amount',
+  total: 'Total',
+  addItem: 'Add item',
+  removeItem: (number) => `Remove item ${number}`,
+};
+
+export const FLOW_OPTIONS = [
+  { value: 'EXPENSE', label: FLOW_LABEL.EXPENSE },
+  { value: 'INCOME', label: FLOW_LABEL.INCOME },
+];
+
+export const ERRORS = {
+  description: 'Add a description.',
+  amount: 'Enter an amount above zero.',
+  date: 'Pick a date.',
+};
+
+// The server's limits for the confirm body (ConfirmRequest).
+export const MAX_ITEMS = 50;
+export const VENDOR_MAX = 255;

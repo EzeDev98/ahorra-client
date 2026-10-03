@@ -6,15 +6,23 @@ import { ApiError } from '@core/http/httpClient.js';
 import IconButton from '@shared/components/ui/IconButton.jsx';
 import TextField from '@shared/components/ui/TextField.jsx';
 import { entriesApi, newClientRequestId } from './api/entriesApi.js';
-import { BUSY_PLACEHOLDER, ENTRY_MAX_LENGTH, GENERIC_ERROR, LABELS, PLACEHOLDER } from './composerContent.js';
+import {
+  BUSY_PLACEHOLDER,
+  ENTRY_MAX_LENGTH,
+  GATED_PLACEHOLDER,
+  GENERIC_ERROR,
+  LABELS,
+  PLACEHOLDER,
+} from './composerContent.js';
 
 // The single input line, vertically centred on the screen (Guide 7.1). Typing shows a send icon in place of the mic, so
 // only one action button shows. Sending calls POST /entries/capture. While the server reads the entry the field empties
 // and says so in its placeholder; it is read-only rather than disabled, so the keyboard stays up and nothing moves or
 // dims. If the entry is refused, the text comes back as typed with the server's reason underneath.
-// A day that is gated (423) is not an error here: the shared mutation handler refreshes the gate state (Step 9l).
+// While the day is gated (Guide 7.7, Step 9l) the field is locked with its own placeholder and the mic stays off. A 423
+// from the server is never an error here: the shared mutation handler refreshes the gate state.
 // Step 9d decides the mic; Step 9n handles having no connection. TextField supplies the 16px text and the focus ring.
-export default function Composer() {
+export default function Composer({ gated = false }) {
   const [text, setText] = useState('');
   const [hint, setHint] = useState('');
   const input = useRef(null);
@@ -25,6 +33,7 @@ export default function Composer() {
   const capture = useMutation({ mutationFn: entriesApi.capture });
   const busy = capture.isPending;
   const hasText = text.trim().length > 0;
+  const placeholder = (busy && BUSY_PLACEHOLDER) || (gated && GATED_PLACEHOLDER) || PLACEHOLDER;
 
   const onChange = (event) => {
     setText(event.target.value);
@@ -34,7 +43,7 @@ export default function Composer() {
   const submit = async (event) => {
     event.preventDefault();
     const entry = text.trim();
-    if (!entry || busy) return;
+    if (!entry || busy || gated) return;
 
     if (attempt.current?.text !== entry) attempt.current = { text: entry, id: newClientRequestId() };
     setHint('');
@@ -56,14 +65,15 @@ export default function Composer() {
       <TextField
         inputRef={input}
         aria-label={LABELS.input}
-        placeholder={busy ? BUSY_PLACEHOLDER : PLACEHOLDER}
+        placeholder={placeholder}
         enterKeyHint="send"
         maxLength={ENTRY_MAX_LENGTH}
         readOnly={busy}
+        disabled={gated}
         value={busy ? '' : text}
         onChange={onChange}
         trailing={
-          hasText && !busy ? (
+          hasText && !busy && !gated ? (
             <IconButton icon={ArrowUp} type="submit" label={LABELS.send} />
           ) : (
             <IconButton icon={Mic} label={LABELS.mic} disabled />

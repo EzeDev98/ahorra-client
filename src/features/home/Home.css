@@ -76,6 +76,17 @@
   padding-bottom: calc(var(--gutter) * 6);
 }
 
+/* The note that sits above the cards while the day is gated. */
+.home__gate-note {
+  flex: none;
+  padding: var(--gap) var(--card-pad);
+  border: var(--border-width) solid var(--color-field-line);
+  border-radius: var(--radius);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-text-muted);
+}
+
 /* A pending card. The surface, border and padding come from Card. */
 .home__card {
   flex: none;
@@ -113,4 +124,52 @@
   justify-content: flex-end;
   gap: var(--gap);
   margin-top: calc(var(--gap) * 1.25);
+}
+
+/* A card that can be tapped to edit. */
+.home__card[tabindex] { cursor: pointer; }
+
+/* Cards are dragged in any direction, so a card claims touch gestures itself. When the list scrolls (PendingStack marks
+   it), vertical touch movement scrolls instead and only sideways drags reach the card. */
+.home__card {
+  touch-action: none;
+  user-select: none;
+}
+
+.home__cards[data-scrolls="true"] .home__card { touch-action: pan-y; }
+
+/* The copy of a card that flies into the bell. It floats above the page and never takes a tap. */
+.home__fly {
+  position: fixed;
+  z-index: var(--z-overlay);
+  margin: 0;
+  pointer-events: none;
+}
+
+/* The bell and the short "Nothing waiting" note that hangs under it. The note takes no space and never moves anything. */
+.home__bell { position: relative; }
+
+.home__peek {
+  position: absolute;
+  z-index: 1;
+  top: calc(100% + var(--gap) * 0.75);
+  inset-inline-end: 0;
+  padding: calc(var(--gap) / 2) var(--gap);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-line);
+  border-radius: var(--radius);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--motion-fast) var(--ease-standard);
+}
+
+.home__peek:empty { display: none; }
+.home__peek[data-visible="true"] { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .home__peek { transition-duration: var(--motion-reduced); }
 }

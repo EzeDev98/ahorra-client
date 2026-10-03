@@ -476,3 +476,92 @@ Home's greeting needs the first name, and the server sends none: the login respo
 | Money | `₦` plus grouped digits, up to two decimals, never rounded away. The prototype rounds to whole naira. | PROPOSED |
 | Category | A missing category name shows "Other", as the prototype does. | PROPOSED |
 | Cards area | A little padding at the top of `.home__cards`, with its start moved up by the same amount, so the entrance slide is not clipped and the first card does not move (the Step 9a note). | ADOPTED |
+
+## Step 9f decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Read | `useDayStatus` (replaces `usePendingEntries`) reads `GET /day/status` and returns `status` (all fields: `gated`, `reason`, `day`, `otherDaysRemaining`, `hardGateTime`, `pending`), `loadFailed`, `retrying` and `retry`. Home passes `status?.pending` to the stack. Step 9l reads the gate fields from the same hook. | ADOPTED |
+| Every app open | `staleTime: 0` re-checks on every mount; the query client refetches on return to the foreground and on reconnect (Guide 7.8). A 423 from any request refreshes the day queries and never shows a toast (already in `queryClient.js`). | ADOPTED |
+| Gated list | The stack renders `pending` as the server sends it: all entries when not gated, the oldest gated day's when gated. | ADOPTED |
+| First load | No spinner: nothing shows until the list arrives, so the input and greeting never move. | PROPOSED |
+| Load failure | Only when the first load fails: an error `InfoBanner` under the input, "Could not load your pending entries.", with a secondary "Try again" button (busy while retrying). A failed refresh after a good load keeps the last list. Failed reads retry twice first, so the notice appears after a few seconds. | PROPOSED |
+
+## Step 9g decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| What Confirm sends | `POST /entries/pending/{id}/confirm` with no body: the entry is confirmed as the server parsed it. Editing first is Step 9h. | ADOPTED |
+| While waiting | The Confirm button shows its spinner and ignores taps, Later waits, and a ref guard stops a second request even from a very fast double tap. The card stays where it is. | ADOPTED |
+| Exit | Only after the server says yes: the card fades and shrinks to 96% where it stands (`motion-base`), then leaves the list and the cards beneath glide up (the existing FLIP). Reduced motion keeps only the fade. | ADOPTED (Guide 7.4) |
+| Cache | The entry is removed from the cached day status at once, then the day status, entries, reports and behaviour overview are refetched. The day status refetch matters most: confirming the last entry can lift the gate (Step 9l). | ADOPTED |
+| 423 | The day is gated. Never an error to show: the gate state is refreshed and the screen follows it. | ADOPTED (Plan) |
+| 404 and 409 | The entry is already gone or already confirmed, for example from another device. Handled like 423: no message, the list is refreshed and the card disappears. | PROPOSED |
+| Other failures | No connection or a server error: a toast, "Could not confirm. Try again.", and the card stays with its button back. | PROPOSED |
+| Money amounts | Unchanged: confirming never edits amounts; the server has the last word on what was saved. | ADOPTED |
+
+## Step 9h decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Opening | A tap anywhere on a pending card, except its two buttons, opens the edit sheet. A card is also reachable by keyboard: Tab to it, Enter or Space opens the sheet. | ADOPTED (Guide 7.4) |
+| What can be edited | Spent or Received, vendor (max 255), date, and the items: description and amount each, add and remove, 1 to 50 items. Category and account are not editable until a lookup endpoint exists (Guide 8.1, DEFERRED). | ADOPTED |
+| What is sent | Only the fields that changed, as the optional confirm body; the item list is sent whole when any item changed. If nothing changed, Confirm sends no body, exactly like the Confirm on the card. | ADOPTED |
+| Cleared vendor | A vendor the person empties is not sent, so the parsed one stays: the server documents no way to blank it. | PROPOSED |
+| Checks before sending | Every item needs a description and an amount above zero; at least one item; a date that is a date. Messages show under the field and the first wrong one is focused. | ADOPTED |
+| The total | Shown live from what is typed, so the person sees the sum the server will compute. The server has the last word. | ADOPTED |
+| Server complaint | A 400 on Confirm shows the server's own message inside the sheet, under the total. Other failures show the same generic message there. 423, 404 and 409 behave as in 9g (refresh, no error), and the sheet closes if its entry is gone. | ADOPTED |
+| While confirming | The sheet cannot be dismissed and its Confirm shows the spinner. On success the sheet closes at the same moment the card fades out (9g). | ADOPTED |
+| Cancel and close | Both discard the edits and nothing is sent. Reopening starts again from the entry as the server parsed it. | ADOPTED |
+
+## Step 9i decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Later | The Later button and a swipe do the same thing. Keyboard and screen-reader users use the button. | ADOPTED (Guide 7.5) |
+| Swipe | Drag past 80 px, or flick (over 0.5 px per ms and more than 24 px); otherwise it springs back in 260 ms. While dragging the card follows the finger and fades up to 35%. A drag is never also a tap: the click after it is swallowed. | ADOPTED (Guide 7.6) |
+| Any direction versus scrolling | On a touch screen a card dragged in any direction fights the list's scrolling. So a card claims all touch movement only while the list does not scroll; once the list scrolls, up and down scroll it and only sideways drags park a card. A mouse always drags in any direction. | PROPOSED (the Guide says any direction; this keeps long lists usable) |
+| Flight | A copy of the card flies to the bell's measured position in 440 ms along a curve bowing 16% of the distance, shrinking to 6% and fading in its last 40%. The real card leaves the list at the start, so the cards beneath glide up while the copy travels. Reduced motion: a fade only. | ADOPTED (Guide 7.6) |
+| Bell | Pulses (scale 1 to 1.18 to 1, 260 ms) when the copy arrives, and the badge count rises then. The accessible name is "N entries waiting", or "Nothing waiting". Tapping the bell is Step 9j. | ADOPTED |
+| Where parked entries live | In memory only (`parkedEntries.js`). A launch starts with an empty bell, so every pending entry is back on Home at each app open; returning to the foreground is Step 9k. | ADOPTED (Guide 7.8) |
+| Count | Counted against the server's pending list, so an entry confirmed from another device stops counting. | ADOPTED |
+| Not yet | While the day is gated, Later and swiping must be disabled and parked entries must fly back (Step 9l). Until then Later works on a gated day too. | OPEN (Step 9l) |
+
+## Step 9j decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Tapping with entries waiting | `parkedEntries.release()` sends back every entry that has arrived in the bell. The badge clears at once and the label returns to "Nothing waiting". The stack makes each returning card fly out of the bell (`flyFromBell`): a copy grows from the bell to the card's place, 440 ms, ease-out, each 70 ms after the one before, in the order they arrived. Reduced motion: a plain fade, no stagger. | ADOPTED (Guide 7.5, 7.6) |
+| Flying copy | As on the way in, a copy flies while the real card (already in its place, hidden) shows when the copy lands. The scrolling list would clip a card flying in from the bar above it. The copy is inert and hidden from screen readers. | ADOPTED |
+| Places out of view | A returning card whose place is scrolled out of the list's view appears at once, with no flight. | PROPOSED |
+| Still flying in | An entry whose flight into the bell has not finished is not released by a tap; it stays parked and is released by the next tap. No card is ever on screen twice. | PROPOSED |
+| Other new cards | A card that arrives new (a fresh capture) still slides in from above; only cards returning from the bell fly out of it. `finishReturn` clears the marks once the stack has started them. | ADOPTED |
+| Tapping with nothing waiting | A small note, "Nothing waiting", hangs under the bell for 1.8 s and fades. It takes no space, is a `role="status"` region (announced), and under reduced motion fades quickly but still shows. | ADOPTED (Guide 7.5) |
+| Shared helper | `makeCopy` in `flyToBell.js` builds the floating copy for both flights. | CHANGED |
+| Not yet | While the day is gated the bell cannot hide entries: parked ones must fly back out by themselves (Step 9l). Resurfacing on launch and on returning to the foreground is Step 9k and reuses `release()`. | OPEN (Steps 9k, 9l) |
+
+## Step 9k decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Launch | Nothing to do: parked entries are in memory only, so a launch starts with an empty bell and every pending entry on Home (Guide 7.8). | ADOPTED |
+| Foreground | When the page becomes visible again, every parked entry flies back out of the bell, in the order parked, 70 ms apart (`parkedEntries.resurface()` from `resurface.js`, started in `main.jsx`). A restore from the back-forward cache (`pageshow`, persisted) does the same. This reads the plan's "when the page becomes visible again" literally and settles Guide open item 12: returning to the foreground counts as opening the app. | ADOPTED (open item 12 resolved this way, to confirm) |
+| No grace period | Even a glance at another app and back brings the entries out of the bell. A short grace (for example ignoring returns within a few seconds) is possible if this proves too eager. | OPEN |
+| Mid-flight | An entry still flying into the bell when the app is reopened is released too. If its flight ends afterwards, `settle` ignores it, so it cannot re-enter the bell while visible. The last frames of that copy may still be seen for up to 440 ms. | ADOPTED |
+| Home not on screen | If the app is opened while another screen is showing, parked entries are cleared without animation, so Home shows them all as soon as it appears. Home tells the store when it is on screen (`attach`, counted so StrictMode's double effects are safe). | ADOPTED |
+| App lock | If the lock covers Home on return, Home is unmounted, so the bell is cleared and every pending entry is on Home after unlocking. | ADOPTED |
+| Pure helper | `release` (bell tap, 9j) and `releaseAll` (app open) share `sendBack`; `release` still leaves a mid-flight entry parked. | CHANGED |
+| Gate | A gated day forcing parked entries out is Step 9l. | OPEN (Step 9l) |
+
+## Step 9l decisions
+
+| Item | Answer | Status |
+|---|---|---|
+| Hard gate note | "It is past 10 pm. Confirm your pending entries to continue." The time is `hardGateTime` written the way people say it (always a 12-hour clock, in the device's language), not "22:00" as the Guide's example has it. If the time cannot be read it says "the daily cut-off". | ADOPTED (owner: very human friendly) |
+| Suspended-day note | "Entries from yesterday are still pending. Confirm them to continue." plus, when other days wait, "2 more days to go after that." The old day reads "yesterday", then a weekday name for the rest of that week, then a date ("10 September", with the year only if it is not this year). | ADOPTED (owner: go with recommendation) |
+| Gate timer | While not gated and entries are pending, a timer asks `GET /day/status` again 2 seconds after the next `hardGateTime`, so the gate appears without a reload. The device clock only decides when to ask; the server decides. A device with a different time zone or clock may ask a little early or late, and the next open or return to the app still shows the truth. A sleeping computer is covered by the refetch on returning to the foreground. | ADOPTED (owner: go with recommendation) |
+| Locked controls | Input disabled with "Confirm pending entries to continue" (text already typed is kept), mic stays off, Later disabled. | ADOPTED |
+| Swipe under the gate | A drag that would park springs back and the gate note shakes. | ADOPTED |
+| Bell under the gate | When the gate turns on, everything in the bell flies back out (the 9k animation), and nothing can be parked while it lasts. | ADOPTED |
+| Suspended-day "takeover" | Read as: the same lock as the hard gate, the note names the old day, and the stack shows what the server returns (only the oldest gated day's entries, oldest first). No separate layout. Clearing a day refreshes the status, and the next gated day, if any, follows. | PROPOSED |
+| 423 | Unchanged: a quiet refresh of the gate state, never a message. | ADOPTED |
