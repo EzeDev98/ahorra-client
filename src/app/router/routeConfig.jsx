@@ -16,6 +16,11 @@ import SetPin from '@features/lock/SetPin.jsx';
 import ChangePin from '@features/lock/ChangePin.jsx';
 import TurnOffLock from '@features/lock/TurnOffLock.jsx';
 import SettingsSecurity from '@features/settings/security/SettingsSecurity.jsx';
+import SettingsAccount from '@features/settings/account/SettingsAccount.jsx';
+import SettingsAppearance from '@features/settings/appearance/SettingsAppearance.jsx';
+import SettingsAbout from '@features/settings/about/SettingsAbout.jsx';
+import Settings from '@features/settings/Settings.jsx';
+import SettingsIncome from '@features/settings/income/SettingsIncome.jsx';
 import Install from '@features/install/Install.jsx';
 import Home from '@features/home/Home.jsx';
 import Reports from '@features/reports/Reports.jsx';
@@ -69,14 +74,14 @@ export const ROUTE_CONFIG = [
   { path: ROUTES.insights, ...IN_APP, element: <Insights backTo={ROUTES.home} incomeTo={ROUTES.settingsIncome} /> },
   { path: ROUTES.behavior, ...IN_APP, element: <Behavior backTo={ROUTES.home} /> },
 
-  { path: ROUTES.settings, ...IN_APP, element: soon('Settings') },
-  { path: ROUTES.settingsIncome, ...IN_APP, element: soon('Income') },
-  { path: ROUTES.settingsAccount, ...IN_APP, element: soon('Account') },
+  { path: ROUTES.settings, ...IN_APP, element: <Settings backTo={ROUTES.home} destinations={{ income: ROUTES.settingsIncome, account: ROUTES.settingsAccount, security: ROUTES.settingsSecurity, appearance: ROUTES.settingsAppearance, about: ROUTES.settingsAbout }} /> },
+  { path: ROUTES.settingsIncome, ...IN_APP, element: <SettingsIncome backTo={ROUTES.settings} /> },
+  { path: ROUTES.settingsAccount, ...IN_APP, element: <SettingsAccount backTo={ROUTES.settings} /> },
   { path: ROUTES.settingsSecurity, ...IN_APP, element: <SettingsSecurity backTo={ROUTES.settings} setPinTo={ROUTES.setPin} lockOffTo={ROUTES.lockOff} changePinTo={ROUTES.changePin} /> },
   { path: ROUTES.changePin, ...IN_APP, element: <ChangePin securityTo={ROUTES.settingsSecurity} setPinTo={ROUTES.setPin} /> },
   { path: ROUTES.lockOff, ...IN_APP, element: <TurnOffLock securityTo={ROUTES.settingsSecurity} /> },
-  { path: ROUTES.settingsAppearance, ...IN_APP, element: soon('Appearance') },
-  { path: ROUTES.settingsAbout, ...IN_APP, element: soon('About') },
+  { path: ROUTES.settingsAppearance, ...IN_APP, element: <SettingsAppearance backTo={ROUTES.settings} /> },
+  { path: ROUTES.settingsAbout, ...IN_APP, element: <SettingsAbout backTo={ROUTES.settings} /> },
 
   ...(ComponentGallery
     ? [

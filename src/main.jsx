@@ -13,11 +13,14 @@ import { clearQueryData, queryClient } from '@core/data/queryClient.js';
 import { sessionManager } from '@features/auth/session/sessionManager.js';
 import { startRefreshAhead } from '@features/auth/session/refreshAhead.js';
 import { startAutoLock } from '@features/lock/autoLock.js';
+import { startTheme } from '@features/settings/appearance/themeStore.js';
 import { startResurface } from '@features/home/resurface.js';
 import ErrorBoundary from '@shared/components/feedback/ErrorBoundary.jsx';
 import DeviceGate from '@features/device/DeviceGate.jsx';
 import App from '@app/App.jsx';
 import { registerServiceWorker } from '@core/pwa/registerServiceWorker.js';
+
+startTheme();
 
 configureHttpClient({
   getAccessToken: sessionManager.getAccessToken,
