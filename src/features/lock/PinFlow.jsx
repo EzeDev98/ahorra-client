@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { ApiError } from '@core/http/httpClient.js';
 import { run } from '@core/motion/motion.js';
 import FormScreen from '@shared/components/layout/FormScreen.jsx';
 import Button from '@shared/components/ui/Button.jsx';
@@ -8,6 +9,7 @@ import useCountdown from '@shared/hooks/useCountdown.js';
 import './PinFlow.css';
 import { PIN_FLOW, UNLOCK } from './lockContent.js';
 import { SHAKE } from './pinMotion.js';
+import { pinService } from './pinService.js';
 import { PIN_LENGTH, pinStore } from './pinStore.js';
 
 // How far a step slides in, in pixels. Same as the other screens; reduced motion keeps a fade.
@@ -25,7 +27,7 @@ const text = (value) => (typeof value === 'function' ? value(PIN_LENGTH) : value
 //   onSkip  optional: shows "Skip for now" (the setup offer only)
 // The new PIN is held in memory only while it is being confirmed, and is stored (hashed) only when both entries match.
 // The current-PIN step uses pinStore.verify, so the wrong-PIN policy and wait apply as they do on Unlock.
-export default function PinFlow({ mode, onBack, onDone, onSkip }) {
+export default function PinFlow({ mode, reset = false, onBack, onDone, onSkip }) {
   const copy = PIN_FLOW[mode];
   const steps = STEPS[mode];
   const [index, setIndex] = useState(0);
@@ -37,6 +39,7 @@ export default function PinFlow({ mode, onBack, onDone, onSkip }) {
   const [focusTick, setFocusTick] = useState(0);
   const seconds = useCountdown(lockedUntil);
   const pending = useRef(''); // the new PIN, while it is being confirmed
+  const currentPin = useRef(''); // the current PIN, kept in change mode so it can go to the server with the new one
   const direction = useRef(0); // 1 forward, -1 back, 0 first render: which way the next step slides in
   const stage = useRef(null);
   const boxes = useRef(null);
@@ -87,16 +90,19 @@ export default function PinFlow({ mode, onBack, onDone, onSkip }) {
     if (step === 'current') {
       setBusy(true);
       try {
-        const result = await pinStore.verify(pin);
+        const result = mode === 'off' ? await pinService.remove(pin) : await pinService.verify(pin);
         if (result.ok) {
           if (index === steps.length - 1) onDone(); // the only step (turning the lock off); stays busy while the screen leaves
-          else go(index + 1);
+          else {
+            currentPin.current = pin;
+            go(index + 1);
+          }
           return;
         }
         setLockedUntil(result.lockedUntil);
         fail(result.lockedUntil ? null : UNLOCK.wrong(result.attemptsLeft));
-      } catch {
-        fail(UNLOCK.generic);
+      } catch (caught) {
+        fail(caught instanceof Error ? caught.message : UNLOCK.generic);
       }
       return;
     }
@@ -114,11 +120,22 @@ export default function PinFlow({ mode, onBack, onDone, onSkip }) {
     }
     setBusy(true);
     try {
-      await pinStore.set(pin);
+      if (reset) await pinService.reset(pin);
+      else if (mode === 'change') await pinService.change(currentPin.current, pin);
+      else await pinService.set(pin);
       pending.current = '';
+      currentPin.current = '';
       onDone(); // stays busy while the screen leaves
     } catch (caught) {
-      fail(caught instanceof Error ? caught.message : UNLOCK.generic);
+      const message = caught instanceof Error ? caught.message : UNLOCK.generic;
+      if (caught instanceof ApiError && caught.status === 400) {
+        // The server refused the new PIN (too easy to guess): go back and choose another.
+        pending.current = '';
+        go(index - 1);
+        setError(message);
+        return;
+      }
+      fail(message);
     }
   };
 

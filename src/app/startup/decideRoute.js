@@ -4,6 +4,8 @@ import { queryKeys } from '@core/data/queryKeys.js';
 import { isPWAInstalled } from '@core/pwa/isPWAInstalled.js';
 import { sessionManager } from '@features/auth/session/sessionManager.js';
 import { lockState } from '@features/lock/lockState.js';
+import { pinService } from '@features/lock/pinService.js';
+import { pinStore } from '@features/lock/pinStore.js';
 import { incomeApi } from '@features/setup/api/incomeApi.js';
 import { setupStatus } from '@features/setup/setupStatus.js';
 import { isOnline } from '@shared/hooks/useNetwork.js';
@@ -47,7 +49,12 @@ export async function decideRoute({ launching, pathname = '' }) {
 
   if (!sessionManager.hasSession()) return launching ? ROUTES.welcome : null;
 
+  if (launching) await pinService.sync(); // follow a PIN set or removed on another device
+
   if (lockState.isLocked()) return pathname === ROUTES.unlock ? null : ROUTES.unlock;
+
+  // Signed in again after "Forgot PIN?": the next step is choosing a new PIN.
+  if (pinService.resetPending() && pinStore.has()) return pathname === ROUTES.setPin ? null : ROUTES.setPin;
 
   const incomeSet = await isIncomeSet({ fetch: launching });
   if (incomeSet === false) return SETUP_ROUTES.includes(pathname) ? null : ROUTES.setupIncome;

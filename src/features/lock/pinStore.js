@@ -36,6 +36,15 @@ function keyForCurrentUser() {
   return user ? `${PREFIX}${user.userId ?? user.username}` : null;
 }
 
+const remoteKey = (key) => `${key}.remote`;
+const remembersRemote = (key) => {
+  try {
+    return Boolean(key) && localStorage.getItem(remoteKey(key)) === '1';
+  } catch {
+    return false;
+  }
+};
+
 // { v, iterations, length, salt, hash } or null. Anything that does not look like a record counts as no PIN.
 function readRecord(key) {
   if (!key) return null;
@@ -97,7 +106,24 @@ export const pinStore = {
   isSupported,
 
   // Whether the signed-in person has a PIN, which is what "app lock is on" means. Fine for useSyncExternalStore.
-  has: () => readRecord(keyForCurrentUser()) !== null,
+  has: () => readRecord(keyForCurrentUser()) !== null || remembersRemote(keyForCurrentUser()),
+
+  // Whether this device holds a copy of the PIN it can check without a connection.
+  hasLocal: () => readRecord(keyForCurrentUser()) !== null,
+
+  // Records that the server has (true) or no longer has (false) a PIN for this person, so the lock is on even before the
+  // PIN has been typed on this device (a PIN set elsewhere).
+  markRemote(isSet) {
+    const key = keyForCurrentUser();
+    if (!key) return;
+    try {
+      if (isSet) localStorage.setItem(remoteKey(key), '1');
+      else localStorage.removeItem(remoteKey(key));
+    } catch {
+      // Storage unavailable: not remembered.
+    }
+    notify();
+  },
 
   // How many digits the stored PIN has (for drawing the right number of boxes), or null without a PIN.
   getLength: () => readRecord(keyForCurrentUser())?.length ?? null,
@@ -154,6 +180,7 @@ export const pinStore = {
     if (!key) return;
     try {
       localStorage.removeItem(key);
+      localStorage.removeItem(remoteKey(key));
     } catch {
       // Storage unavailable: nothing to remove.
     }

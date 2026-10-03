@@ -24,7 +24,7 @@ export const SESSION_ENDED = {
     text: 'Please sign in again to continue.',
   },
   forgotPin: {
-    title: 'App lock is off',
-    text: 'You signed out because you forgot your PIN. Sign in to continue. You can set a new PIN in Settings.',
+    title: 'Sign in to set a new PIN',
+    text: 'You signed out because you forgot your PIN. Sign in, then choose a new PIN.',
   },
 };

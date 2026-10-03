@@ -14,6 +14,7 @@ export const UNLOCK = {
   wait: (seconds) => `Try again in ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}.`,
   unsupported: 'A PIN cannot be checked in this browser context.',
   forgot: 'Forgot PIN? Sign in again',
+  needsConnection: 'A connection is needed for this. Please connect and try again.',
   generic: 'Something went wrong. Please try again.',
 };
 

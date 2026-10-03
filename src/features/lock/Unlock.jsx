@@ -10,6 +10,7 @@ import useCountdown from '@shared/hooks/useCountdown.js';
 import './Unlock.css';
 import { UNLOCK } from './lockContent.js';
 import { lockState } from './lockState.js';
+import { pinService } from './pinService.js';
 import { PIN_LENGTH, pinStore } from './pinStore.js';
 import { SHAKE } from './pinMotion.js';
 
@@ -65,7 +66,7 @@ export default function Unlock({ homeTo }) {
     setError(null);
     setVerifying(true);
     try {
-      const result = await pinStore.verify(pin);
+      const result = await pinService.verify(pin);
       if (result.ok) {
         goOn();
         return; // stays busy while the screen leaves
@@ -73,8 +74,8 @@ export default function Unlock({ homeTo }) {
       setLockedUntil(result.lockedUntil);
       setError(result.lockedUntil ? null : UNLOCK.wrong(result.attemptsLeft));
       run(boxes.current, SHAKE, { duration: 'base', ease: 'standard' });
-    } catch {
-      setError(UNLOCK.generic);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : UNLOCK.generic);
     }
     setCode('');
     setVerifying(false);
@@ -92,7 +93,7 @@ export default function Unlock({ homeTo }) {
   const forgot = () => {
     if (leaving) return;
     setLeaving(true);
-    pinStore.remove();
+    pinService.forgot(); // the PIN stays on the server; a new one is asked for after the next sign-in
     sessionManager.signOut(FORGOT_PIN);
   };
 
