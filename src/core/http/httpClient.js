@@ -89,7 +89,7 @@ function toApiError(status, body) {
 
 async function send({ method, url, payload, token, headers, signal }) {
   const requestHeaders = { Accept: 'application/json', ...headers };
-  if (payload !== undefined) requestHeaders['Content-Type'] = 'application/json';
+  if (payload !== undefined && !(payload instanceof FormData)) requestHeaders['Content-Type'] = 'application/json';
   if (token) requestHeaders.Authorization = `Bearer ${token}`;
 
   let response;
@@ -128,7 +128,7 @@ async function request(method, path, { body, params, auth = true, headers, signa
   const req = {
     method,
     url: buildUrl(path, params),
-    payload: body === undefined ? undefined : JSON.stringify(body),
+    payload: body === undefined ? undefined : body instanceof FormData ? body : JSON.stringify(body),
     token: auth ? config.getAccessToken() : null,
     headers,
     signal,

@@ -36,6 +36,12 @@
     <meta name="apple-mobile-web-app-title" content="Ahorra" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="preload" href="/fonts/red-hat-text-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- The loading screen below, styled here so it looks the same in dev (where the stylesheet arrives with the script) as in production. Same values as LoadingScreen.css and AppLogo.css: change them together. -->
+    <style>
+      body { margin: 0; }
+      .loading-screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #FFFFFF; }
+      .loading-screen .ui-logo { color: #2A4B9B; font: 400 20px/28px "Red Hat Text", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    </style>
   </head>
   <body>
     <div id="root">

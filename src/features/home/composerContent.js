@@ -13,3 +13,17 @@ export const GENERIC_ERROR = 'Something went wrong. Please try again.';
 
 // The server's limit for one entry (CaptureRequest).
 export const ENTRY_MAX_LENGTH = 2000;
+
+// Speaking an entry (Step 18). The words are transcribed on the server and put in the input for the person to check.
+export const VOICE = {
+  maxSeconds: 60,
+  listening: 'Listening…',
+  transcribing: 'Writing it down…',
+  listeningHint: 'Tap the square when you are done, or the cross to cancel. One minute at most.',
+  review: 'Check the words, then tap send.',
+  stop: 'Finish recording',
+  cancel: 'Cancel recording',
+  unavailable: 'Voice entry is not available on this device',
+  blocked: 'Microphone access is blocked. Allow it in your browser settings, or type your entry.',
+  failed: 'Could not start the microphone. You can type your entry instead.',
+};

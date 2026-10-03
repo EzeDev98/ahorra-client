@@ -1,7 +1,7 @@
 import Button from '@shared/components/ui/Button.jsx';
 import Card from '@shared/components/ui/Card.jsx';
 import InfoBanner from '@shared/components/ui/InfoBanner.jsx';
-import Spinner from '@shared/components/ui/Spinner.jsx';
+import Skeleton from '@shared/components/ui/Skeleton.jsx';
 import Tag from '@shared/components/ui/Tag.jsx';
 import { incomeDate, incomeLastDay, periodWords, rangeWords } from './incomeText.js';
 import { INCOME_SETTINGS } from './settingsIncomeContent.js';
@@ -28,9 +28,7 @@ export default function IncomeHistory() {
   }
   if (isPending || !history) {
     return (
-      <div className="settings-income__loading">
-        <Spinner />
-      </div>
+      <Skeleton rows={3} />
     );
   }
   if (history.length === 0) return <p className="settings-income__empty">{INCOME_SETTINGS.historyEmpty}</p>;

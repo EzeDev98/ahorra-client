@@ -66,7 +66,7 @@ export const ROUTE_CONFIG = [
   { path: ROUTES.setPin, ...FIRST_RUN, element: <SetPin offerTo={ROUTES.setupLock} securityTo={ROUTES.settingsSecurity} changePinTo={ROUTES.changePin} homeTo={ROUTES.home} /> },
   { path: ROUTES.unlock, ...SIGNED_IN, element: <Unlock homeTo={ROUTES.home} /> },
 
-  { path: ROUTES.home, ...IN_APP, element: <Home destinations={{ reports: ROUTES.reports, insights: ROUTES.insights, behavior: ROUTES.behavior, settings: ROUTES.settings }} /> },
+  { path: ROUTES.home, ...IN_APP, element: <Home destinations={{ reports: ROUTES.reports, insights: ROUTES.insights, behavior: ROUTES.behavior, settings: ROUTES.settings, reminder: ROUTES.settingsReminder }} /> },
   { path: ROUTES.reports, ...IN_APP, element: <Reports backTo={ROUTES.home} detailTo={reportDetailPath} /> },
   { path: ROUTES.reportDetail, ...IN_APP, element: <ReportDetail backTo={ROUTES.reports} /> },
   { path: ROUTES.insights, ...IN_APP, element: <Insights backTo={ROUTES.home} incomeTo={ROUTES.settingsIncome} /> },

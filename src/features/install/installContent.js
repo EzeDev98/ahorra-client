@@ -29,7 +29,7 @@ export const MANUAL_STEPS = {
   ],
   'ios-inapp': [
     { icon: EllipsisVertical, text: 'Open the menu in this app. It is usually the Share icon or three dots.' },
-    { icon: ExternalLink, text: 'Choose Open in Safari, then come back to this screen.' },
+    { icon: ExternalLink, text: 'Choose Open in Safari, then follow the Add to Home Screen steps there.' },
   ],
   'safari-desktop': [
     { icon: Share, text: 'Click the Share button in the Safari toolbar, or open the File menu.' },

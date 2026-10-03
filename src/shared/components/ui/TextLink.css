@@ -10,6 +10,7 @@
   color: var(--color-brand);
   border-radius: var(--radius-sm);
   cursor: pointer;
+  transition: opacity var(--motion-hover) var(--ease-standard);
 }
 
 @media (hover: hover) {

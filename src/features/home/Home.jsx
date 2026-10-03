@@ -9,6 +9,7 @@ import { gateNote } from './gate.js';
 import { BELL_LABEL } from './pendingContent.js';
 import { parkedEntries, useParked } from './parkedEntries.js';
 import PendingStack from './PendingStack.jsx';
+import ReminderNudge from './ReminderNudge.jsx';
 import SidePanel from './SidePanel.jsx';
 import useBellPeek from './useBellPeek.js';
 import useGreeting from './useGreeting.js';
@@ -65,6 +66,7 @@ export default function Home({ destinations }) {
         <Greeting title={title} subtitle={subtitle} />
         <Composer gated={gated} />
         <PendingStack entries={visible} gated={gated} note={note} loadFailed={loadFailed} retrying={retrying} onRetry={retry} />
+        <ReminderNudge to={destinations.reminder} />
       </main>
       <SidePanel open={menuOpen} gated={gated} destinations={destinations} onClose={() => setMenuOpen(false)} />
     </div>

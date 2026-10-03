@@ -11,6 +11,7 @@ export const LABELS = {
   flow: 'Type',
   vendor: 'Vendor',
   date: 'Date',
+  category: 'Category',
   items: 'Items',
   item: (number) => `Item ${number}`,
   amount: 'Amount',

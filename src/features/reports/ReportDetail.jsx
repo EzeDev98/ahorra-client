@@ -6,7 +6,7 @@ import ScreenContainer from '@shared/components/layout/ScreenContainer.jsx';
 import Button from '@shared/components/ui/Button.jsx';
 import EmptyState from '@shared/components/ui/EmptyState.jsx';
 import InfoBanner from '@shared/components/ui/InfoBanner.jsx';
-import Spinner from '@shared/components/ui/Spinner.jsx';
+import Skeleton from '@shared/components/ui/Skeleton.jsx';
 import ReportBody from './ReportBody.jsx';
 import { DETAIL_COPY } from './reportDetailContent.js';
 import { reportDateLong } from './reportDate.js';
@@ -38,9 +38,7 @@ export default function ReportDetail({ backTo }) {
     );
   } else if (isPending || !report) {
     body = (
-      <div className="report__loading">
-        <Spinner />
-      </div>
+      <Skeleton rows={4} />
     );
   } else {
     body = <ReportBody report={report} />;

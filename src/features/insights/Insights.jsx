@@ -6,7 +6,7 @@ import ScreenContainer from '@shared/components/layout/ScreenContainer.jsx';
 import Button from '@shared/components/ui/Button.jsx';
 import EmptyState from '@shared/components/ui/EmptyState.jsx';
 import InfoBanner from '@shared/components/ui/InfoBanner.jsx';
-import Spinner from '@shared/components/ui/Spinner.jsx';
+import Skeleton from '@shared/components/ui/Skeleton.jsx';
 import InsightsBody from './InsightsBody.jsx';
 import { INSIGHTS_COPY } from './insightsContent.js';
 import useVariance from './useVariance.js';
@@ -43,9 +43,7 @@ export default function Insights({ backTo, incomeTo }) {
     );
   } else if (isPending || !variance) {
     body = (
-      <div className="insights__loading">
-        <Spinner />
-      </div>
+      <Skeleton rows={4} />
     );
   } else {
     body = <InsightsBody data={variance} />;

@@ -4,6 +4,7 @@ import { queryKeys } from '@core/data/queryKeys.js';
 import { useToast } from '@shared/components/ui/toastContext.js';
 import { entriesApi } from './api/entriesApi.js';
 import { CONFIRM_COPY } from './pendingContent.js';
+import { reminderNudge } from './reminderNudge.js';
 
 // Confirms one pending entry as the server parsed it (POST /entries/pending/{id}/confirm, no body). Returns
 //   confirm(entry, leave, { edits, onError }) -> Promise<boolean>   true when the entry was confirmed.
@@ -44,6 +45,7 @@ export default function useConfirmEntry() {
     queryClient.invalidateQueries({ queryKey: queryKeys.entries.all });
     queryClient.invalidateQueries({ queryKey: queryKeys.report.all });
     queryClient.invalidateQueries({ queryKey: queryKeys.behavior.all });
+    reminderNudge.arm(); // the first confirmed entry arms the quiet reminder line on Home (Step 16c)
     return true;
   };
 }

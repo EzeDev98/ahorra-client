@@ -9,6 +9,14 @@ export const queryKeys = {
     all: ['entries'],
     pending: () => ['entries', 'pending'],
   },
+  plan: {
+    all: ['plan'],
+    current: () => ['plan', 'current'],
+  },
+  categories: {
+    all: ['categories'],
+    list: () => ['categories', 'list'],
+  },
   report: {
     all: ['report'],
     ambient: () => ['report', 'ambient'],

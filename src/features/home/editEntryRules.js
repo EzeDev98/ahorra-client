@@ -6,6 +6,7 @@ export function toDraft(entry) {
   return {
     flow: entry.flow,
     vendor: entry.vendor ?? '',
+    categoryId: entry.categoryId == null ? '' : String(entry.categoryId),
     entryDate: entry.entryDate ?? '',
     items: entry.items.map((item, index) => ({ key: index, description: item.description, amount: String(item.amount) })),
   };
@@ -39,6 +40,8 @@ export function toEdits(entry, draft) {
   if (vendor && vendor !== (entry.vendor ?? '')) edits.vendor = vendor;
 
   if (draft.entryDate && draft.entryDate !== entry.entryDate) edits.entryDate = draft.entryDate;
+
+  if (draft.categoryId && Number(draft.categoryId) !== entry.categoryId) edits.categoryId = Number(draft.categoryId);
 
   const items = draft.items.map((item) => ({ description: item.description.trim(), amount: Number(item.amount) }));
   const unchanged =

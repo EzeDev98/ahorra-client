@@ -173,3 +173,23 @@
 @media (prefers-reduced-motion: reduce) {
   .home__peek { transition-duration: var(--motion-reduced); }
 }
+
+/* The quiet reminder line (Step 16c): at the foot of the stage, in the room the cards leave under them, so it never
+   moves the input or the cards. */
+.home__nudge {
+  position: absolute;
+  inset-inline: 0;
+  bottom: var(--gutter);
+  margin-inline: auto;
+  width: min(var(--screen-width), calc(100% - var(--gutter) * 2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap);
+}
+
+.home__nudge-text {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-text-muted);
+}

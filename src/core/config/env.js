@@ -13,7 +13,7 @@ export const env = Object.freeze({
   apiBaseUrl: raw.replace(/\/+$/, ''),
   // Areas served by a local stand-in instead of the server (comma list in VITE_STAND_INS). Remove a name once its endpoint exists.
   standIns: Object.freeze(
-    (import.meta.env.VITE_STAND_INS ?? 'obligations,push,spending-plan').split(',').map((name) => name.trim()).filter(Boolean),
+    (import.meta.env.VITE_STAND_INS ?? '').split(',').map((name) => name.trim()).filter(Boolean),
   ),
   // Public key for web push (VAPID). Empty until the server has one; the push stand-in works without it.
   vapidPublicKey: (import.meta.env.VITE_VAPID_PUBLIC_KEY ?? '').trim(),

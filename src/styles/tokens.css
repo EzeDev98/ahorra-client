@@ -16,10 +16,10 @@
   --p-text-light: #14181F;      --p-text-dark: #E8EBF2;
   --p-muted-light: #5B6472;     --p-muted-dark: #98A1B3;
   --p-line-light: #DDE1E8;      --p-line-dark: #2A3040;
-  --p-field-light: #8A93A3;     --p-field-dark: #6B7588;
+  --p-field-light: #848D9C;     --p-field-dark: #6B7588;
 
-  --p-green-600: #2E8B6E;       --p-green-300: #5FC4A2;
-  --p-terracotta-600: #C2622D;  --p-terracotta-300: #E89A6E;
+  --p-green-600: #2A7E64;       --p-green-300: #5FC4A2;
+  --p-terracotta-600: #AF5828;  --p-terracotta-300: #E89A6E;
   --p-red-600: #C0362C;         --p-red-300: #F07A70;
 
   --p-focus-tint-light: rgba(42, 75, 155, 0.20);
@@ -74,6 +74,7 @@
   --motion-fly: 440ms;
   --motion-stagger: 70ms;
   --motion-reduced: 120ms;
+  --motion-hover: 120ms; /* colour fade on hover, nothing moves */
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
 
@@ -102,3 +103,8 @@
 /* Settings, Appearance: force a theme. No attribute means follow the system. */
 :root[data-theme="light"] { color-scheme: light; }
 :root[data-theme="dark"] { color-scheme: dark; }
+
+/* Reduced motion: hover changes colour at once. */
+@media (prefers-reduced-motion: reduce) {
+  :root { --motion-hover: 0ms; }
+}

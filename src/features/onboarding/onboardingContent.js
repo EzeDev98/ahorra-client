@@ -2,7 +2,7 @@ import { CircleCheck, FileText, PencilLine, Scale } from 'lucide-react';
 
 // All Onboarding copy lives here, so changing a word never means touching the screen.
 // Typing only for now: voice is deferred, so nothing here promises it.
-export const TAGLINE = 'Say what you spent. Ahorra keeps the books.';
+export const TAGLINE = 'Tell Ahorra what you spent. It keeps the books.';
 
 export const FEATURES = [
   {

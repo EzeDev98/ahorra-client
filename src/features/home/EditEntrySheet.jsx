@@ -8,14 +8,16 @@ import ChipSelect from '@shared/components/ui/ChipSelect.jsx';
 import FormError from '@shared/components/ui/FormError.jsx';
 import FormField from '@shared/components/ui/FormField.jsx';
 import IconButton from '@shared/components/ui/IconButton.jsx';
+import SelectField from '@shared/components/ui/SelectField.jsx';
 import TextField from '@shared/components/ui/TextField.jsx';
 import { formatMoney } from '@shared/utils/formatMoney.js';
 import { ERRORS, FLOW_OPTIONS, LABELS, MAX_ITEMS, SHEET, VENDOR_MAX } from './editEntryContent.js';
 import { draftTotal, toDraft, toEdits, validateDraft } from './editEntryRules.js';
+import useCategories from './useCategories.js';
 
 // The edit sheet (Guide 7.4): Spent or Received, vendor, date, and the items with their amounts. Confirm sends only what
-// changed, as the confirm body, or no body at all when nothing changed. The category and account are not editable here:
-// no endpoint lists them yet (Guide 8.1).
+// changed, as the confirm body, or no body at all when nothing changed. The category can be changed from the user's own
+// list (Step 17); the account is not editable here until accounts have a lookup too (Guide 8.1).
 // entry: the pending entry being edited. open/onClose: the sheet's visibility. busy: a confirm for this entry is in flight.
 // onConfirm(edits, onError) -> Promise<boolean>: the stack confirms and, on a server complaint, calls onError(message).
 // Give it a new `key` each time it opens, so the form starts from the entry again.
@@ -27,6 +29,12 @@ export default function EditEntrySheet({ entry, open, onClose, onConfirm, busy }
   const [problem, setProblem] = useState('');
   const [focusTick, setFocusTick] = useState(0);
   const nextKey = useRef(draft.items.length);
+  const { categories } = useCategories();
+  // The picker lists the user's categories, plus the entry's current one if it has since been switched off, so it never shows blank.
+  const categoryOptions = categories.map((category) => ({ value: String(category.id), label: category.name }));
+  if (entry.categoryId != null && !categoryOptions.some((option) => option.value === String(entry.categoryId))) {
+    categoryOptions.unshift({ value: String(entry.categoryId), label: entry.categoryName ?? LABELS.category });
+  }
 
   useEffect(() => {
     if (!focusTick) return;
@@ -92,6 +100,17 @@ export default function EditEntrySheet({ entry, open, onClose, onConfirm, busy }
         <FormField label={LABELS.vendor}>
           <TextField value={draft.vendor} maxLength={VENDOR_MAX} onChange={(event) => setField('vendor')(event.target.value)} />
         </FormField>
+        {categoryOptions.length > 0 && (
+          <FormField label={LABELS.category}>
+            <SelectField
+              options={categoryOptions}
+              placeholder={LABELS.category}
+              value={draft.categoryId}
+              onChange={(event) => setField('categoryId')(event.target.value)}
+              disabled={busy}
+            />
+          </FormField>
+        )}
         <FormField label={LABELS.date} error={errors?.date ? ERRORS.date : undefined}>
           <TextField type="date" value={draft.entryDate} onChange={(event) => setField('entryDate')(event.target.value)} />
         </FormField>

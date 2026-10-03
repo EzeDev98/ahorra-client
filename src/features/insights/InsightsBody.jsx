@@ -6,6 +6,7 @@ import { varianceWords } from '@features/reports/reportFormat.js';
 import CategoryBreakdown from './CategoryBreakdown.jsx';
 import { INSIGHTS_COPY } from './insightsContent.js';
 import { periodRange } from './periodRange.js';
+import PlanSection from './PlanSection.jsx';
 
 const money = (value) => (value == null ? null : formatMoney(value));
 
@@ -38,6 +39,7 @@ export default function InsightsBody({ data }) {
 
   return (
     <div className="insights">
+      <PlanSection />
       <Section heading={INSIGHTS_COPY.sectionPeriod}>
         <Card>
           {hasBaseline && (
