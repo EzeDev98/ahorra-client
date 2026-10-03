@@ -62,6 +62,14 @@ export default function AnimatedRoutes() {
     const el = stage.current;
     el.getAnimations().forEach((animation) => animation.cancel());
     window.scrollTo(0, 0);
+
+    // Keyboard and screen-reader focus follows the screen: it goes to the new heading, which is then read out.
+    // A screen that already focused something (an autofocused field) keeps it.
+    const heading = el.querySelector('h1');
+    if (heading && !el.contains(document.activeElement)) {
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+    }
     run(el, [{ opacity: 0, transform: slide(from) }, { opacity: 1, transform: 'none' }], { duration: 'base', ease: 'out' });
   }, [shown]);
 

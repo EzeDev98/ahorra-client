@@ -1,3 +1,5 @@
+import { watchForUpdate } from './applyUpdate.js';
+
 // Same prefix as public/sw.js.
 const SHELL_CACHE_PREFIX = 'ahorra-shell-';
 
@@ -15,6 +17,7 @@ async function register() {
   try {
     // updateViaCache: 'none' makes the browser fetch sw.js fresh, so a new build is noticed.
     const registration = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
+    watchForUpdate(registration);
     // A long-open installed app checks for a new build whenever it returns to the foreground.
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') registration.update().catch(() => {});

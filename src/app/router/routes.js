@@ -40,6 +40,7 @@ export const ROUTES = Object.freeze({
   lockOff: '/settings/security/lock-off',
   settingsAppearance: '/settings/appearance',
   settingsAbout: '/settings/about',
+  settingsReminder: '/settings/reminder',
 
   // Development only: App.jsx adds this route in dev builds.
   gallery: '/gallery',

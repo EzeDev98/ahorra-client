@@ -1,3 +1,6 @@
 /* Wraps the screens so a transition can move them as one piece. Clips the sideways slide so the page never
    gets a horizontal scrollbar while it plays. */
 .route-stage { overflow-x: clip; }
+
+/* A heading that takes focus when a screen arrives is not a control: no focus ring on it. */
+.route-stage h1:focus-visible { box-shadow: none; }

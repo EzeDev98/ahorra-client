@@ -19,6 +19,7 @@ import SettingsSecurity from '@features/settings/security/SettingsSecurity.jsx';
 import SettingsAccount from '@features/settings/account/SettingsAccount.jsx';
 import SettingsAppearance from '@features/settings/appearance/SettingsAppearance.jsx';
 import SettingsAbout from '@features/settings/about/SettingsAbout.jsx';
+import SettingsReminder from '@features/notifications/SettingsReminder.jsx';
 import Settings from '@features/settings/Settings.jsx';
 import SettingsIncome from '@features/settings/income/SettingsIncome.jsx';
 import Install from '@features/install/Install.jsx';
@@ -27,7 +28,6 @@ import Reports from '@features/reports/Reports.jsx';
 import Behavior from '@features/behavior/Behavior.jsx';
 import Insights from '@features/insights/Insights.jsx';
 import ReportDetail from '@features/reports/ReportDetail.jsx';
-import RoutePlaceholder from './RoutePlaceholder.jsx';
 import { ROUTES, reportDetailPath } from './routes.js';
 
 // Every route as data: a path from ROUTES, the screen, and the guards it needs (see withGuards.jsx).
@@ -36,7 +36,6 @@ import { ROUTES, reportDetailPath } from './routes.js';
 //   unlocked        if app lock is on, the app must be unlocked first (UnlockGuard, Step 5c)
 //   setupComplete   income must already be set, or the person goes to the income setup (SetupGuard, Step 5c)
 //   firstRunOnly    a first-run screen: once setup is finished it goes to Home (FirstRunGuard, Step 7d)
-// A step that builds a screen replaces that route's `soon(...)` element and touches nothing else.
 const OPEN = {}; // Onboarding, Install: reachable from a browser tab
 const BEFORE_SIGN_IN = { installed: true };
 const SIGNED_IN = { installed: true, authenticated: true }; // the unlock screen itself
@@ -44,7 +43,6 @@ const FIRST_RUN = { installed: true, authenticated: true, unlocked: true }; // s
 const SETUP_SCREEN = { ...FIRST_RUN, firstRunOnly: true }; // income, fixed obligations, the lock offer: only until setup is finished
 const IN_APP = { ...FIRST_RUN, setupComplete: true }; // every other screen in the app
 
-const soon = (name) => <RoutePlaceholder name={name} />;
 
 // Dev only. import.meta.env.DEV is false in a production build, so the gallery is left out of it.
 const ComponentGallery = import.meta.env.DEV ? lazy(() => import('@app/dev/gallery/ComponentGallery.jsx')) : null;
@@ -74,7 +72,7 @@ export const ROUTE_CONFIG = [
   { path: ROUTES.insights, ...IN_APP, element: <Insights backTo={ROUTES.home} incomeTo={ROUTES.settingsIncome} /> },
   { path: ROUTES.behavior, ...IN_APP, element: <Behavior backTo={ROUTES.home} /> },
 
-  { path: ROUTES.settings, ...IN_APP, element: <Settings backTo={ROUTES.home} destinations={{ income: ROUTES.settingsIncome, account: ROUTES.settingsAccount, security: ROUTES.settingsSecurity, appearance: ROUTES.settingsAppearance, about: ROUTES.settingsAbout }} /> },
+  { path: ROUTES.settings, ...IN_APP, element: <Settings backTo={ROUTES.home} destinations={{ income: ROUTES.settingsIncome, account: ROUTES.settingsAccount, security: ROUTES.settingsSecurity, appearance: ROUTES.settingsAppearance, about: ROUTES.settingsAbout, reminder: ROUTES.settingsReminder }} /> },
   { path: ROUTES.settingsIncome, ...IN_APP, element: <SettingsIncome backTo={ROUTES.settings} /> },
   { path: ROUTES.settingsAccount, ...IN_APP, element: <SettingsAccount backTo={ROUTES.settings} /> },
   { path: ROUTES.settingsSecurity, ...IN_APP, element: <SettingsSecurity backTo={ROUTES.settings} setPinTo={ROUTES.setPin} lockOffTo={ROUTES.lockOff} changePinTo={ROUTES.changePin} /> },
@@ -82,6 +80,7 @@ export const ROUTE_CONFIG = [
   { path: ROUTES.lockOff, ...IN_APP, element: <TurnOffLock securityTo={ROUTES.settingsSecurity} /> },
   { path: ROUTES.settingsAppearance, ...IN_APP, element: <SettingsAppearance backTo={ROUTES.settings} /> },
   { path: ROUTES.settingsAbout, ...IN_APP, element: <SettingsAbout backTo={ROUTES.settings} /> },
+  { path: ROUTES.settingsReminder, ...IN_APP, element: <SettingsReminder backTo={ROUTES.settings} /> },
 
   ...(ComponentGallery
     ? [
