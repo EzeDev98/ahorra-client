@@ -4,7 +4,6 @@ import PageHeader from '@shared/components/layout/PageHeader.jsx';
 import ScreenContainer from '@shared/components/layout/ScreenContainer.jsx';
 import Card from '@shared/components/ui/Card.jsx';
 import DetailRow from '@shared/components/ui/DetailRow.jsx';
-import pkg from '../../../../package.json';
 import { ABOUT_COPY } from './aboutContent.js';
 
 // Route "/settings/about" (Step 11f). The app name, its version, and the legal documents. Static: no data, so no loading or
@@ -20,7 +19,7 @@ export default function SettingsAbout({ backTo }) {
         <p className="settings-about__tagline">{ABOUT_COPY.tagline}</p>
         <Card>
           <DetailRow label={ABOUT_COPY.appName}>
-            {ABOUT_COPY.version} {pkg.version} ({typeof __APP_BUILD_ID__ === 'string' ? __APP_BUILD_ID__ : 'dev'})
+            {ABOUT_COPY.version} {typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : '0.0.0'} ({typeof __APP_BUILD_ID__ === 'string' ? __APP_BUILD_ID__ : 'dev'})
           </DetailRow>
         </Card>
         <h2 className="settings-about__heading">{ABOUT_COPY.legalTitle}</h2>

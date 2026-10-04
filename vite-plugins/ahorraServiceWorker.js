@@ -30,6 +30,18 @@ export function makeBuildId(root) {
   return `${stamp}-${commit}`;
 }
 
+// 1.0.0, 2.0.0 ...: the number of commits since baseCommit, so every push to main raises the major number by its commits.
+// Falls back to 0.0.0 when git history is unavailable (a shallow clone), and the build id still tells builds apart.
+export function makeVersion(root, baseCommit) {
+  try {
+    const count = Number(execSync(`git rev-list --count ${baseCommit}..HEAD`, { cwd: root, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim());
+    if (Number.isInteger(count) && count >= 0) return `${count}.0.0`;
+  } catch {
+    // No usable history.
+  }
+  return '0.0.0';
+}
+
 // Fails the build loudly if a marker is missing, instead of shipping an unstamped worker.
 function replaceOnce(text, marker, value, file) {
   if (!text.includes(marker)) throw new Error(`${file}: marker ${marker} not found.`);
