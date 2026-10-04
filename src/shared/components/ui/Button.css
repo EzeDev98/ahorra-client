@@ -29,7 +29,7 @@
 .ui-button--secondary { border-color: var(--color-field-line); }
 .ui-button--ghost { color: var(--color-text-muted); }
 .ui-button--danger { background: var(--color-error); color: var(--color-on-brand); }
-.ui-button--block { width: 100%; }
+.ui-button--block { width: 100%; height: var(--button-height-block); }
 
 @media (hover: hover) {
   .ui-button--secondary:hover:not(:disabled),

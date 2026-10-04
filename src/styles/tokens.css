@@ -80,6 +80,7 @@
 
   /* ---------- 3. Component ---------- */
   --button-height: 32px;
+  --button-height-block: 42px; /* full-width buttons: easier to tap than the 32px inline size */
   --button-pad-x: 12px;
   --input-height: 40px;
   --icon-button-size: 32px;
