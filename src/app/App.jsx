@@ -3,6 +3,7 @@ import NetworkGate from '@shared/components/feedback/NetworkGate.jsx';
 import ToastProvider from '@shared/components/ui/ToastProvider.jsx';
 import StartupGate from '@app/startup/StartupGate.jsx';
 import ResumeDecision from '@app/startup/ResumeDecision.jsx';
+import UpdatePrompt from '@app/update/UpdatePrompt.jsx';
 import AnimatedRoutes from '@app/router/AnimatedRoutes.jsx';
 
 export default function App() {
@@ -13,6 +14,7 @@ export default function App() {
           <BrowserRouter>
             <ResumeDecision />
             <AnimatedRoutes />
+            <UpdatePrompt />
           </BrowserRouter>
         </ToastProvider>
       </StartupGate>

@@ -19,7 +19,7 @@ function listFiles(dir, base = '') {
 }
 
 // 202609301215-a1b2c3d: minute of the build, then the commit.
-function makeBuildId(root) {
+export function makeBuildId(root) {
   const stamp = new Date().toISOString().replace(/\D/g, '').slice(0, 12);
   let commit = 'nogit';
   try {
@@ -36,7 +36,7 @@ function replaceOnce(text, marker, value, file) {
   return text.replace(marker, () => value);
 }
 
-export function ahorraServiceWorker() {
+export function ahorraServiceWorker(buildId) {
   let root;
   let outDir;
 
@@ -48,7 +48,6 @@ export function ahorraServiceWorker() {
       outDir = join(config.root, config.build.outDir);
     },
     writeBundle() {
-      const buildId = makeBuildId(root);
       const precache = listFiles(outDir)
         .filter((file) => !NEVER_PRECACHE.has(file) && !SKIPPED_FILE.test(file))
         .map((file) => `/${file}`)

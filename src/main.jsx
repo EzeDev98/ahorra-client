@@ -18,6 +18,7 @@ import { startResurface } from '@features/home/resurface.js';
 import ErrorBoundary from '@shared/components/feedback/ErrorBoundary.jsx';
 import DeviceGate from '@features/device/DeviceGate.jsx';
 import App from '@app/App.jsx';
+import { appUpdate } from '@core/pwa/appUpdate.js';
 import { registerServiceWorker } from '@core/pwa/registerServiceWorker.js';
 
 startTheme();
@@ -37,6 +38,7 @@ startRefreshAhead();
 startAutoLock();
 startResurface();
 registerServiceWorker();
+appUpdate.start();
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

@@ -20,7 +20,7 @@ export default function SettingsAbout({ backTo }) {
         <p className="settings-about__tagline">{ABOUT_COPY.tagline}</p>
         <Card>
           <DetailRow label={ABOUT_COPY.appName}>
-            {ABOUT_COPY.version} {pkg.version}
+            {ABOUT_COPY.version} {pkg.version} ({typeof __APP_BUILD_ID__ === 'string' ? __APP_BUILD_ID__ : 'dev'})
           </DetailRow>
         </Card>
         <h2 className="settings-about__heading">{ABOUT_COPY.legalTitle}</h2>
