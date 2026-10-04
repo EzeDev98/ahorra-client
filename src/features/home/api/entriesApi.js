@@ -9,7 +9,7 @@ export const newClientRequestId = () => crypto.randomUUID();
 export const entriesApi = {
   // POST /entries/capture
   // in:  { text (required, max 2000), source: 'TEXT' | 'VOICE' (default TEXT), clientRequestId (max 100) }
-  // out: PendingEntry. 423 day gated, 400 unreadable or too large.
+  // out: PendingEntry[], one per separate event in the note. 423 day gated, 400 unreadable or too large.
   capture: ({ text, source = 'TEXT', clientRequestId = newClientRequestId() }) =>
     httpClient.post('/entries/capture', { text, source, clientRequestId }),
 
