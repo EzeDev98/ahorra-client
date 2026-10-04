@@ -9,7 +9,7 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 const outDir = `${root}public/icons/`;
 
 // Opaque icons (maskable, Apple) are placed on this colour. Matches the manifest background_color.
-const BACKGROUND = '#FFFFFF';
+const BACKGROUND = '#203C93';
 
 const source = ['icon-source.png', 'icon-source.svg'].map((name) => `${root}assets/${name}`).find(existsSync);
 if (!source) throw new Error('No source image. Add assets/icon-source.png or assets/icon-source.svg.');
