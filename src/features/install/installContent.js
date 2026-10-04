@@ -47,3 +47,13 @@ export const MANUAL_STEPS = {
     { icon: Check, text: 'Confirm, then open Ahorra from your app list or taskbar.' },
   ],
 };
+
+// The hand-off, shown in the browser tab once Ahorra is installed. The tab's job is done: the installed app takes over.
+export const HANDOFF_COPY = {
+  installingTitle: 'Installing Ahorra…',
+  doneTitle: "You're all set!",
+  description: (place) => `Ahorra is being added to your device. Find the Ahorra icon on ${place}, open the app from there, and sign in to continue.`,
+  banner: (place) => `This browser tab is no longer needed. Use the Ahorra app from ${place} from now on, not this browser.`,
+  continue: 'Continue',
+  closeNote: 'You can now close this browser tab.',
+};

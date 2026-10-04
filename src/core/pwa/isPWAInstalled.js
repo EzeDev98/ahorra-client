@@ -58,3 +58,11 @@ export function isPWAInstalled() {
   if (installedInBrowser) return true;
   return inDisplayMode('fullscreen') && knownToBeInstalled();
 }
+
+// True only when THIS window is the installed app itself. Unlike isPWAInstalled, it ignores the browser's "the app is
+// installed on this device" answer and the appinstalled event: a browser tab that has just installed the app is still
+// a browser tab, and the Install screen must keep it on the hand-off instead of moving it into the app.
+export function isRunningAsApp() {
+  if (INSTALLED_MODES.some(inDisplayMode) || navigator.standalone === true) return true;
+  return inDisplayMode('fullscreen') && knownToBeInstalled();
+}

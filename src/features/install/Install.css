@@ -30,3 +30,9 @@
   font-size: var(--text-sm);
   line-height: var(--leading-sm);
 }
+
+.install__footnote {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-text-muted);
+}

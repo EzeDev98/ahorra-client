@@ -3,11 +3,12 @@ import { Navigate, useNavigate } from 'react-router';
 import './Install.css';
 import { clearInstallPrompt, getInstallState, subscribeInstall } from '@core/pwa/installPrompt.js';
 import { canPromptInstall, getInstallPlatform } from '@core/pwa/installPlatform.js';
-import { isPWAInstalled } from '@core/pwa/isPWAInstalled.js';
+import { isPWAInstalled, isRunningAsApp } from '@core/pwa/isPWAInstalled.js';
 import FormScreen from '@shared/components/layout/FormScreen.jsx';
 import Button from '@shared/components/ui/Button.jsx';
 import InfoBanner from '@shared/components/ui/InfoBanner.jsx';
-import { COPY, HANDOFF_PLACE, MANUAL_STEPS } from './installContent.js';
+import { COPY, MANUAL_STEPS } from './installContent.js';
+import InstallHandoff from './InstallHandoff.jsx';
 
 // How long to wait for the browser's install prompt before showing manual steps.
 const PROMPT_WAIT_MS = 10000;
@@ -25,7 +26,6 @@ export default function Install({ backTo, welcomeTo }) {
   const [installing, setInstalling] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const [cancelled, setCancelled] = useState(false);
-  const [closeFailed, setCloseFailed] = useState(false);
 
   useEffect(() => {
     if (!promptable || prompt) return undefined;
@@ -43,10 +43,11 @@ export default function Install({ backTo, welcomeTo }) {
     return () => query.removeEventListener('change', onChange);
   }, []);
 
-  if (isPWAInstalled()) return <Navigate to={welcomeTo} replace />;
+  // Only the installed app's own window moves on to Welcome. A browser tab that has just installed the app stays here, on the hand-off.
+  if (isRunningAsApp()) return <Navigate to={welcomeTo} replace />;
 
   let phase = 'waiting';
-  if (installed || accepted) phase = 'handoff';
+  if (installed || accepted || isPWAInstalled()) phase = 'handoff';
   else if (!promptable) phase = 'manual';
   else if (installing) phase = 'installing';
   else if (prompt) phase = 'ready';
@@ -68,26 +69,7 @@ export default function Install({ backTo, welcomeTo }) {
     }
   };
 
-  const closeTab = () => {
-    window.close(); // works only for tabs the browser lets a script close
-    setTimeout(() => setCloseFailed(true), 300);
-  };
-
-  if (phase === 'handoff') {
-    return (
-      <FormScreen
-        title={COPY.handoffTitle}
-        description={`Open Ahorra from ${HANDOFF_PLACE[platform]} to continue. You can close this tab.`}
-        footer={
-          <Button variant="secondary" block onClick={closeTab}>
-            {COPY.closeTab}
-          </Button>
-        }
-      >
-        {closeFailed && <InfoBanner>{COPY.closeFailed}</InfoBanner>}
-      </FormScreen>
-    );
-  }
+  if (phase === 'handoff') return <InstallHandoff platform={platform} />;
 
   return (
     <FormScreen
