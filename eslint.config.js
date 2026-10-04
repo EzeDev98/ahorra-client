@@ -13,7 +13,7 @@ export default [
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      globals: globals.browser,
+      globals: { ...globals.browser, __APP_BUILD_ID__: 'readonly' },
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
     plugins: { 'react-hooks': reactHooks },
@@ -35,6 +35,8 @@ export default [
       ],
     },
   },
+  // Build tooling runs in Node, not the browser.
+  { files: ['vite.config.js', 'vite-plugins/**'], languageOptions: { globals: globals.node } },
   // The one folder allowed to import PatternFly.
   { files: ['src/shared/components/ui/**'], rules: { 'no-restricted-imports': 'off' } },
 ];

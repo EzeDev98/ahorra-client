@@ -37,14 +37,12 @@ function replaceOnce(text, marker, value, file) {
 }
 
 export function ahorraServiceWorker(buildId) {
-  let root;
   let outDir;
 
   return {
     name: 'ahorra-service-worker',
     apply: 'build',
     configResolved(config) {
-      root = config.root;
       outDir = join(config.root, config.build.outDir);
     },
     writeBundle() {
