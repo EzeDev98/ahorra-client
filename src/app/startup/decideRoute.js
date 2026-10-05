@@ -7,6 +7,7 @@ import { lockState } from '@features/lock/lockState.js';
 import { pinService } from '@features/lock/pinService.js';
 import { pinStore } from '@features/lock/pinStore.js';
 import { incomeApi } from '@features/setup/api/incomeApi.js';
+import { obligationsApi } from '@features/setup/api/obligationsApi.js';
 import { setupStatus } from '@features/setup/setupStatus.js';
 import { isOnline } from '@shared/hooks/useNetwork.js';
 import { ROUTES } from '@app/router/routes.js';
@@ -36,6 +37,23 @@ async function isIncomeSet({ fetch }) {
   }
 }
 
+// true: the server already holds fixed obligations for this person. false: it holds none. null: could not tell.
+// Setup is remembered per device, so after a reinstall or on a new device the server is what says it was done before.
+async function hasObligations({ fetch }) {
+  const key = queryKeys.obligations.list();
+  if (!fetch) {
+    const cached = queryClient.getQueryData(key);
+    return cached === undefined ? null : cached.length > 0;
+  }
+  if (!isOnline()) return null;
+  try {
+    const list = await Promise.race([queryClient.fetchQuery({ queryKey: key, queryFn: obligationsApi.list }), tooSlow(INCOME_WAIT_MS)]);
+    return list.length > 0;
+  } catch {
+    return null;
+  }
+}
+
 // The one routing decision (Plan 5e). Every launch and every return to the foreground asks the same questions, in
 // this order: installed? signed in? locked? setup done? Resolves to the path the person must be on, or null when
 // they may stay where they are.
@@ -60,7 +78,13 @@ export async function decideRoute({ launching, pathname = '' }) {
   if (incomeSet === false) return SETUP_ROUTES.includes(pathname) ? null : ROUTES.setupIncome;
 
   // Income is set but setup was never finished on this device (closed part-way, or a new device): resume it.
-  if (incomeSet === true && !setupStatus.isComplete()) return SETUP_ROUTES.includes(pathname) ? null : ROUTES.setupObligations;
+  if (incomeSet === true && !setupStatus.isComplete()) {
+    if (SETUP_ROUTES.includes(pathname)) return null;
+    const saved = await hasObligations({ fetch: launching });
+    if (saved === true) setupStatus.markComplete(); // done on an earlier install or device: no setup screen
+    else if (saved === false) return ROUTES.setupObligations;
+    // null: could not tell. SetupGuard asks again and shows a retry, so nothing is forced here.
+  }
 
   return launching ? ROUTES.home : null;
 }

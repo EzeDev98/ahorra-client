@@ -20,3 +20,9 @@ export const HINTS = {
 export const OTHER_LABEL = 'Other';
 
 export const GENERIC_ERROR = 'Something went wrong. Please try again.';
+
+// The same form reached from Settings, after setup: no step indicator, and the button saves.
+export const OBLIGATIONS_SETTINGS = {
+  title: 'Fixed obligations',
+  description: 'Bills you pay on a schedule. Ahorra takes these out of your Needs share when it builds your plan.',
+};

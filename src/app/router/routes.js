@@ -34,6 +34,7 @@ export const ROUTES = Object.freeze({
   // Settings
   settings: '/settings',
   settingsIncome: '/settings/income',
+  settingsObligations: '/settings/obligations',
   settingsAccount: '/settings/account',
   settingsSecurity: '/settings/security',
   changePin: '/settings/security/change-pin',

@@ -2,7 +2,7 @@
 export const LOCK_OFFER = {
   title: 'Lock Ahorra with a PIN?',
   description:
-    'Ahorra will ask for your PIN each time you open it. The PIN stays on this device, and you can change this later in Settings.',
+    'Ahorra will ask for your PIN each time you open it. Your PIN is saved with your account, so it works on any device you sign in on. You can change this later in Settings.',
 };
 
 export const UNLOCK = {

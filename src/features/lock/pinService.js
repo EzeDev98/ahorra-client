@@ -156,4 +156,16 @@ export const pinService = {
       // Keep what this device already knows.
     }
   },
+
+  // true: the server holds a PIN for this person. false: it holds none. null: could not tell (offline, slow, failed).
+  // Changes nothing on the device. Used to skip the first-run lock offer for someone who set a PIN before.
+  async hasServerPin() {
+    if (!sessionManager.hasSession() || !isOnline()) return null;
+    try {
+      const status = await Promise.race([pinApi.status(), tooSlow(SYNC_WAIT_MS)]);
+      return Boolean(status?.pinSet);
+    } catch {
+      return null;
+    }
+  },
 };

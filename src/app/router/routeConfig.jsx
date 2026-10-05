@@ -22,6 +22,7 @@ import SettingsAbout from '@features/settings/about/SettingsAbout.jsx';
 import SettingsReminder from '@features/notifications/SettingsReminder.jsx';
 import Settings from '@features/settings/Settings.jsx';
 import SettingsIncome from '@features/settings/income/SettingsIncome.jsx';
+import SettingsObligations from '@features/settings/obligations/SettingsObligations.jsx';
 import Install from '@features/install/Install.jsx';
 import Home from '@features/home/Home.jsx';
 import Reports from '@features/reports/Reports.jsx';
@@ -72,8 +73,9 @@ export const ROUTE_CONFIG = [
   { path: ROUTES.insights, ...IN_APP, element: <Insights backTo={ROUTES.home} incomeTo={ROUTES.settingsIncome} /> },
   { path: ROUTES.behavior, ...IN_APP, element: <Behavior backTo={ROUTES.home} /> },
 
-  { path: ROUTES.settings, ...IN_APP, element: <Settings backTo={ROUTES.home} destinations={{ income: ROUTES.settingsIncome, account: ROUTES.settingsAccount, security: ROUTES.settingsSecurity, appearance: ROUTES.settingsAppearance, about: ROUTES.settingsAbout, reminder: ROUTES.settingsReminder }} /> },
+  { path: ROUTES.settings, ...IN_APP, element: <Settings backTo={ROUTES.home} destinations={{ income: ROUTES.settingsIncome, obligations: ROUTES.settingsObligations, account: ROUTES.settingsAccount, security: ROUTES.settingsSecurity, appearance: ROUTES.settingsAppearance, about: ROUTES.settingsAbout, reminder: ROUTES.settingsReminder }} /> },
   { path: ROUTES.settingsIncome, ...IN_APP, element: <SettingsIncome backTo={ROUTES.settings} /> },
+  { path: ROUTES.settingsObligations, ...IN_APP, element: <SettingsObligations backTo={ROUTES.settings} /> },
   { path: ROUTES.settingsAccount, ...IN_APP, element: <SettingsAccount backTo={ROUTES.settings} /> },
   { path: ROUTES.settingsSecurity, ...IN_APP, element: <SettingsSecurity backTo={ROUTES.settings} setPinTo={ROUTES.setPin} lockOffTo={ROUTES.lockOff} changePinTo={ROUTES.changePin} /> },
   { path: ROUTES.changePin, ...IN_APP, element: <ChangePin securityTo={ROUTES.settingsSecurity} setPinTo={ROUTES.setPin} /> },

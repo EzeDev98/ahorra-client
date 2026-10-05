@@ -14,7 +14,7 @@ import Button from '@shared/components/ui/Button.jsx';
 import FormError from '@shared/components/ui/FormError.jsx';
 import './obligations.css';
 import ObligationRow from './ObligationRow.jsx';
-import { GENERIC_ERROR, LABELS, OBLIGATIONS, OTHER_LABEL } from './obligationsContent.js';
+import { GENERIC_ERROR, LABELS, OBLIGATIONS, OBLIGATIONS_SETTINGS, OTHER_LABEL } from './obligationsContent.js';
 import { SUGGESTIONS, newRow, rowsFromObligations, validateRows } from './obligationsRules.js';
 import { syncObligations } from './obligationsSync.js';
 
@@ -24,7 +24,7 @@ const SLIDE_PX = 16;
 // The form behind "/setup/obligations". It works on a draft and saves everything when the person continues.
 // initial: the obligations the server already has (empty on a first visit).
 // backTo: the income screen. nextTo: where Continue leads. Passed in so this file holds no path.
-export default function ObligationsForm({ initial, backTo, nextTo }) {
+export default function ObligationsForm({ initial, backTo, nextTo, inSettings = false }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const suggestionsId = useId();
@@ -124,20 +124,24 @@ export default function ObligationsForm({ initial, backTo, nextTo }) {
 
   const available = SUGGESTIONS.filter((name) => !rows.some((row) => row.preset && row.name === name));
   const nothing = rows.length === 0 && removedIds.length === 0;
+  const copy = inSettings ? OBLIGATIONS_SETTINGS : OBLIGATIONS;
+  let submitLabel = 'Continue';
+  if (inSettings) submitLabel = 'Save';
+  else if (nothing) submitLabel = 'Skip for now';
 
   return (
     <div ref={stage}>
       <FormScreen
-        title={OBLIGATIONS.title}
-        description={OBLIGATIONS.description}
-        step={<StepIndicator current={2} total={SETUP_STEP_COUNT} />}
+        title={copy.title}
+        description={copy.description}
+        step={inSettings ? null : <StepIndicator current={2} total={SETUP_STEP_COUNT} />}
         onBack={() => navigate(backTo)}
         onSubmit={submit}
         footer={
           <>
             <FormError>{formError}</FormError>
             <Button type="submit" block busy={busy}>
-              {nothing ? 'Skip for now' : 'Continue'}
+              {submitLabel}
             </Button>
           </>
         }
