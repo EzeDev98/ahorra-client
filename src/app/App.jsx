@@ -4,6 +4,7 @@ import ToastProvider from '@shared/components/ui/ToastProvider.jsx';
 import StartupGate from '@app/startup/StartupGate.jsx';
 import ResumeDecision from '@app/startup/ResumeDecision.jsx';
 import UpdatePrompt from '@app/update/UpdatePrompt.jsx';
+import ReminderSync from '@features/notifications/ReminderSync.jsx';
 import AnimatedRoutes from '@app/router/AnimatedRoutes.jsx';
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
             <ResumeDecision />
             <AnimatedRoutes />
             <UpdatePrompt />
+            <ReminderSync />
           </BrowserRouter>
         </ToastProvider>
       </StartupGate>

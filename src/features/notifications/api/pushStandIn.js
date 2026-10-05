@@ -1,10 +1,28 @@
 // Stand-in for the missing push-subscription endpoints. Nothing is sent anywhere; the subscription is kept on this device.
 const KEY = 'ahorra.standin.push';
+const REMINDER_KEY = 'ahorra.standin.reminder';
 
 export const pushStandIn = {
   subscribe: async ({ endpoint, keys }) => {
     try {
       localStorage.setItem(KEY, JSON.stringify({ endpoint, keys }));
+    } catch {
+      // Storage unavailable: nothing to keep.
+    }
+  },
+
+  getReminder: async () => {
+    try {
+      return { enabled: localStorage.getItem(REMINDER_KEY) === 'on' };
+    } catch {
+      return { enabled: false };
+    }
+  },
+
+  setReminder: async (enabled) => {
+    try {
+      if (enabled) localStorage.setItem(REMINDER_KEY, 'on');
+      else localStorage.removeItem(REMINDER_KEY);
     } catch {
       // Storage unavailable: nothing to keep.
     }

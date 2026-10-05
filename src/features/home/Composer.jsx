@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { ArrowUp, Mic, Square, X } from 'lucide-react';
+import { ArrowUp, Check, Mic, X } from 'lucide-react';
 import { invalidateEntryData } from '@core/data/queryClient.js';
 import { ApiError } from '@core/http/httpClient.js';
 import IconButton from '@shared/components/ui/IconButton.jsx';
@@ -122,7 +122,7 @@ export default function Composer({ gated = false }) {
           recorder.recording ? (
             <>
               <IconButton icon={X} type="button" label={VOICE.cancel} onClick={recorder.cancel} />
-              <IconButton icon={Square} type="button" label={VOICE.stop} onClick={recorder.stop} />
+              <IconButton icon={Check} type="button" label={VOICE.stop} onClick={recorder.stop} />
             </>
           ) : hasText && !busy && !gated ? (
             <IconButton icon={ArrowUp} type="submit" label={LABELS.send} disabled={!online} />

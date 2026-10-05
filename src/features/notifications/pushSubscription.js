@@ -20,14 +20,8 @@ function keyToBytes(base64Url) {
   return Uint8Array.from(raw, (char) => char.charCodeAt(0));
 }
 
-// Call from a tap: browsers only show the permission question in answer to one.
-// Returns 'on', 'blocked' (the person said no, or it was already blocked) or 'dismissed' (the question was closed).
-// Throws when the subscription could not be created or sent, and then nothing is switched on.
-export async function enablePush() {
-  const permission = await Notification.requestPermission();
-  if (permission === 'denied') return 'blocked';
-  if (permission !== 'granted') return 'dismissed';
-
+// Creates (or finds) this device's push subscription and hands it to the server. Needs the permission already granted.
+async function subscribeDevice() {
   const registration = await waitForWorker();
   if (env.vapidPublicKey && registration) {
     const subscription =
@@ -36,16 +30,63 @@ export async function enablePush() {
     await pushApi.subscribe(subscription.toJSON());
   } else if (isStandIn('push')) {
     await pushApi.subscribe({ endpoint: STAND_IN_ENDPOINT, keys: {} });
-  } else {
+  } else if (!env.vapidPublicKey) {
     throw new Error('Web push is not configured: VITE_VAPID_PUBLIC_KEY is empty.');
+  } else {
+    throw new Error('Web push needs the service worker, which does not run under npm run dev. Use npm run build && npm run preview.');
   }
+}
 
+// Call from a tap: browsers only show the permission question in answer to one.
+// Returns 'on', 'blocked' (the person said no, or it was already blocked) or 'dismissed' (the question was closed).
+// Throws when the subscription could not be created or sent, and then nothing is switched on.
+// Two callers can land here from the same tap (the checkbox and the first-tap restore), so they share one run.
+let inFlight = null;
+
+export function enablePush() {
+  inFlight ??= (async () => {
+    const permission = await Notification.requestPermission();
+    if (permission === 'denied') return 'blocked';
+    if (permission !== 'granted') return 'dismissed';
+
+    await subscribeDevice();
+    await pushApi.setReminder(true);
+    reminderStore.set(true);
+    return 'on';
+  })().finally(() => {
+    inFlight = null;
+  });
+  return inFlight;
+}
+
+// Run after sign-in. The server remembers the choice, so a reinstall does not lose it. Returns
+//   'on'         the reminder is on and this device is subscribed again, silently
+//   'needs-tap'  the reminder is on but the browser permission is back to "ask": the caller waits for the first tap
+//   'blocked'    the reminder is on but notifications are denied in the browser
+//   'off'        the person has not switched it on
+// The server flag is left alone when the permission is missing, so allowing it later in the browser brings it back.
+export async function restoreReminder() {
+  const { enabled } = await pushApi.getReminder();
+  if (!enabled) {
+    reminderStore.set(false);
+    return 'off';
+  }
+  if (Notification.permission === 'denied') {
+    reminderStore.set(false);
+    return 'blocked';
+  }
+  if (Notification.permission !== 'granted') {
+    reminderStore.set(false);
+    return 'needs-tap';
+  }
+  await subscribeDevice();
   reminderStore.set(true);
   return 'on';
 }
 
 // Tells the server first, so a failure leaves the reminder on and the screen honest. Throws on failure.
 export async function disablePush() {
+  await pushApi.setReminder(false);
   const registration = await navigator.serviceWorker.getRegistration();
   const subscription = await registration?.pushManager.getSubscription();
   await pushApi.unsubscribe(subscription?.endpoint ?? STAND_IN_ENDPOINT);

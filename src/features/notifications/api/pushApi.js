@@ -2,8 +2,7 @@ import { httpClient } from '@core/http/httpClient.js';
 import { isStandIn } from '@core/http/standIn.js';
 import { pushStandIn } from './pushStandIn.js';
 
-// CONTRACT [PROPOSED, for plan S3]. The server has no endpoint yet; the stand-in answers until 'push'
-// is removed from VITE_STAND_INS.
+// CONTRACT. The server has these endpoints; the stand-in answers only while 'push' is listed in VITE_STAND_INS.
 
 const real = {
   // POST /push/subscriptions
@@ -14,6 +13,15 @@ const real = {
   // DELETE /push/subscriptions?endpoint=
   // out: nothing (204)
   unsubscribe: (endpoint) => httpClient.delete('/push/subscriptions', { params: { endpoint } }),
+
+  // GET /push/reminder
+  // out: { enabled }   kept on the user, so it survives a reinstall
+  getReminder: () => httpClient.get('/push/reminder'),
+
+  // PUT /push/reminder
+  // in:  { enabled }
+  // out: nothing (204)
+  setReminder: (enabled) => httpClient.put('/push/reminder', { enabled }),
 };
 
 export const pushApi = isStandIn('push') ? pushStandIn : real;

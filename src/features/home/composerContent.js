@@ -19,7 +19,7 @@ export const VOICE = {
   maxSeconds: 60,
   listening: 'Listening…',
   transcribing: 'Writing it down…',
-  listeningHint: 'Tap the square when you are done, or the cross to cancel. One minute at most.',
+  listeningHint: 'Tap the check when you are done, or the cross to cancel. One minute at most.',
   review: 'Check the words, then tap send.',
   stop: 'Finish recording',
   cancel: 'Cancel recording',

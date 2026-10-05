@@ -1,6 +1,6 @@
-// Whether the daily reminder is switched on for this device (Step 12). Kept on the device, like the theme: the server has
-// no per-user notification setting. The browser's own permission is checked separately, so a permission taken away in the
-// browser settings still shows as off.
+// A copy of the reminder choice on this device, so screens can read it without waiting for the server. The server holds
+// the real choice (it survives a reinstall) and writes it here after sign-in and when Settings opens. The browser's own
+// permission is checked separately, so a permission taken away in the browser settings still shows as off.
 const KEY = 'ahorra.reminder';
 
 export const reminderStore = {

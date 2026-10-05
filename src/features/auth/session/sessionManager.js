@@ -17,9 +17,9 @@ function endLocal(reason) {
 }
 
 // Takes the fields of the POST /auth/login response. Call only when tokens were issued (not when mfaRequired).
-function start({ accessToken, refreshToken, userId, username, expiresIn }) {
+function start({ accessToken, refreshToken, userId, username, firstName, expiresIn }) {
   if (!accessToken || !refreshToken) throw new Error('The login response carried no tokens.');
-  tokenStore.set({ accessToken, refreshToken, userId, username, accessExpiresAt: accessExpiry(accessToken, expiresIn) });
+  tokenStore.set({ accessToken, refreshToken, userId, username, firstName, accessExpiresAt: accessExpiry(accessToken, expiresIn) });
   endedReason = null;
   notify();
 }
@@ -101,7 +101,7 @@ export const sessionManager = {
   hasSession: () => Boolean(tokenStore.get()),
   getUser: () => {
     const session = tokenStore.get();
-    return session ? { userId: session.userId, username: session.username } : null;
+    return session ? { userId: session.userId, username: session.username, firstName: session.firstName ?? null } : null;
   },
   getEndedReason: () => endedReason,
 };

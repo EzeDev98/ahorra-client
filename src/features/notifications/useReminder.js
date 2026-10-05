@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { pushSupport } from '@core/pwa/pushSupport.js';
+import { pushApi } from './api/pushApi.js';
 import { disablePush, enablePush } from './pushSubscription.js';
 import { reminderStore } from './reminderStore.js';
 
@@ -19,6 +20,24 @@ export default function useReminder() {
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
 
+  // The server holds the person's choice, so ask it when the screen opens. A failed lookup keeps what this device knows.
+  useEffect(() => {
+    if (status === 'needs-install' || status === 'unsupported') return undefined;
+    let live = true;
+    pushApi
+      .getReminder()
+      .then(({ enabled }) => {
+        if (!live) return;
+        reminderStore.set(enabled && Notification.permission === 'granted');
+        setStatus(startingStatus());
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const change = async (turnOn) => {
     if (busy) return;
     setBusy(true);
@@ -31,7 +50,8 @@ export default function useReminder() {
         await disablePush();
         setStatus('off');
       }
-    } catch {
+    } catch (error) {
+      console.error('Daily reminder change failed:', error?.status ?? '', error?.message ?? error, error);
       setFailed(true);
     } finally {
       setBusy(false);
