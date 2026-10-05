@@ -23,7 +23,6 @@ if (!existsSync(markSource)) throw new Error('No assets/logo-mark.png. Add the p
 const targets = [
   { file: 'icon-192.png', size: 192, mark: true },
   { file: 'icon-512.png', size: 512, mark: true },
-  { file: 'icon-maskable-512.png', size: 512, opaque: true },
   { file: 'apple-touch-icon.png', size: 180, opaque: true },
   { file: 'favicon-32.png', size: 32 },
 ];
