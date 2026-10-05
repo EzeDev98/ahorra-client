@@ -21,8 +21,9 @@ const markSource = `${root}assets/logo-mark.png`;
 if (!existsSync(markSource)) throw new Error('No assets/logo-mark.png. Add the plain "A" on a transparent background.');
 
 const targets = [
-  { file: 'icon-192.png', size: 192, mark: true },
-  { file: 'icon-512.png', size: 512, mark: true },
+  { file: 'icon-192.png', size: 192 },
+  { file: 'icon-512.png', size: 512 },
+  { file: 'icon-maskable-512.png', size: 512, opaque: true },
   { file: 'apple-touch-icon.png', size: 180, opaque: true },
   { file: 'favicon-32.png', size: 32 },
 ];
