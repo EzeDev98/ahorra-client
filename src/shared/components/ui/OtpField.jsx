@@ -90,8 +90,8 @@ export default function OtpField({
             boxes.current[index] = node;
           }}
           id={index === 0 ? field.id : undefined}
-          className={cx('ui-otp__box', isInvalid && 'ui-otp__box--invalid')}
-          type={masked ? 'password' : 'text'}
+          className={cx('ui-otp__box', masked && 'ui-otp__box--masked', isInvalid && 'ui-otp__box--invalid')}
+          type="text"
           inputMode="numeric"
           pattern="[0-9]*"
           autoComplete={masked || index > 0 ? 'off' : 'one-time-code'}

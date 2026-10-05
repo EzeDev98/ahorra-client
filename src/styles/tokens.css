@@ -51,6 +51,7 @@
   /* Startup screen: white in both themes, to match the manifest background_color. */
   --color-splash-bg: var(--p-white);
   --color-splash-logo: var(--p-ink-600);
+  --color-splash-text: var(--p-muted-light);
 
   --font-family: "Red Hat Text", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-weight: 400;
@@ -99,6 +100,11 @@
   --z-overlay: 80;
   --z-toast: 100;
   --z-splash: 120;
+  --splash-logo-size: 96px;
+  --splash-logo-shadow: drop-shadow(0 4px 10px rgba(42, 75, 155, 0.35));
+  --splash-gap: 16px;
+  --splash-dot-size: 8px;
+  --splash-dot-cycle: 1500ms;
 }
 
 /* Settings, Appearance: force a theme. No attribute means follow the system. */

@@ -35,3 +35,10 @@
   background: transparent;
   color: inherit;
 }
+
+/* A PIN shows dots. A password input would do that, but phone keyboards then ignore the numeric hint and switch to
+   letters after every digit, so the box stays a text input and the digit is hidden by the browser's text security. */
+.ui-otp__box--masked {
+  -webkit-text-security: disc;
+  text-security: disc;
+}

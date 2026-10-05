@@ -1,16 +1,29 @@
 import './LoadingScreen.css';
-import AppLogo from '@shared/components/branding/AppLogo.jsx';
 import { cx } from '@shared/utils/classNames.js';
+import { LOADING_COPY } from './loadingContent.js';
 
-// The in-app loading screen: white, with the logo, between the native splash and the first screen.
-// index.html holds an identical static copy that shows until React mounts, so nothing changes on screen at the
-// hand-over. If you change this markup or LoadingScreen.css, change that copy too.
+// The in-app loading screen: white, with the logo, the tagline and three pulsing dots, between the native splash and
+// the first screen. index.html holds an identical static copy that shows until React mounts, so nothing changes on
+// screen at the hand-over. If you change this markup or LoadingScreen.css, change that copy too.
+// The logo is the "A" alone on a transparent background (public/logo-mark.png), with a soft shadow so it stands out on white.
 // leaving: set while the screen fades out over the first screen, so screen readers stop announcing it.
 // page: for a route guard that is waiting. Same look, but it sits below the connection notice instead of covering it.
 export default function LoadingScreen({ ref, leaving = false, page = false }) {
   return (
-    <div ref={ref} className={cx('loading-screen', page && 'loading-screen--page')} role="status" aria-label="Loading Ahorra" aria-hidden={leaving || undefined}>
-      <AppLogo size="lg" />
+    <div
+      ref={ref}
+      className={cx('loading-screen', page && 'loading-screen--page')}
+      role="status"
+      aria-label={LOADING_COPY.label}
+      aria-hidden={leaving || undefined}
+    >
+      <img className="loading-screen__logo" src="/logo-mark.png" alt="" width="512" height="512" />
+      <p className="loading-screen__tagline">{LOADING_COPY.tagline}</p>
+      <span className="loading-screen__dots" aria-hidden="true">
+        <span className="loading-screen__dot" />
+        <span className="loading-screen__dot" />
+        <span className="loading-screen__dot" />
+      </span>
     </div>
   );
 }
