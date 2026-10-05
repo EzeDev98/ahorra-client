@@ -1,18 +1,19 @@
 // Generates the iOS launch images and writes their <link> tags into index.html. Run with: npm run splash
 // iOS ignores the manifest splash: without these images an installed app shows a blank screen while it starts.
-// Each image is the app icon centred on white, matching the white native splash on Android (manifest background_color).
-// Source: the same file `npm run icons` uses (assets/icon-source.png, or .svg). Portrait only.
+// Each image is the plain "A" logo with a soft shadow, centred on white, matching the white native splash on Android (manifest background_color).
+// Source: assets/logo-mark.png. Portrait only.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
+import { logoWithShadow } from './logoWithShadow.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const outDir = `${root}public/splash/`;
 const htmlPath = `${root}index.html`;
 
 const BACKGROUND = '#FFFFFF'; // matches the manifest background_color
-const LOGO_SHARE = 0.3; // the icon's canvas, as a share of the screen's shorter side
+const LOGO_SHARE = 0.36; // the logo's canvas (shadow room included), as a share of the screen's shorter side
 
 // [width, height, pixel ratio] in CSS pixels, portrait. iOS 17.5 and later only (the device gate's floor).
 const DEVICES = [
@@ -41,8 +42,8 @@ const DEVICES = [
 const START = '<!-- apple-splash:start -->';
 const END = '<!-- apple-splash:end -->';
 
-const source = ['icon-source.png', 'icon-source.svg'].map((name) => `${root}assets/${name}`).find(existsSync);
-if (!source) throw new Error('No source image. Add assets/icon-source.png or assets/icon-source.svg.');
+const markSource = `${root}assets/logo-mark.png`; // the plain "A" on a transparent background
+if (!existsSync(markSource)) throw new Error('No assets/logo-mark.png. Add the plain "A" on a transparent background.');
 
 const html = readFileSync(htmlPath, 'utf8');
 const from = html.indexOf(START);
@@ -59,10 +60,7 @@ for (const [width, height, ratio] of DEVICES) {
   const file = `${pixelWidth}x${pixelHeight}.png`;
 
   const logoSize = Math.round(Math.min(pixelWidth, pixelHeight) * LOGO_SHARE);
-  const logo = await sharp(source)
-    .resize(logoSize, logoSize, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .png()
-    .toBuffer();
+  const logo = await logoWithShadow(markSource, logoSize);
 
   await sharp({ create: { width: pixelWidth, height: pixelHeight, channels: 3, background: BACKGROUND } })
     .composite([{ input: logo, gravity: 'center' }])
