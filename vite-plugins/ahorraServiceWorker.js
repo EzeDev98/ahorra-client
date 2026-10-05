@@ -30,19 +30,23 @@ export function makeBuildId(root) {
   return `${stamp}-${commit}`;
 }
 
-// 1.0.0, 2.0.0 ...: the number of commits since baseCommit, so every deploy raises the major number by the commits it carries.
-// Hosts often clone only the latest commit, so a shallow clone is completed first. If the history still cannot be read the
-// version falls back to 0.0.0 and says so in the build log, and the build id still tells builds apart.
-export function makeVersion(root, baseCommit) {
-  const git = (args) => execSync(`git ${args}`, { cwd: root, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+// 1.0.0, 2.0.0 ...: the number of commits from the one that added the .version-start file up to this build, counting that
+// commit as 1. Nothing has to be set by hand: every new commit raises the number. Hosts often clone only the latest commit,
+// so a shallow clone is completed first. If the history cannot be read the version falls back to 0.0.0 and the reason is
+// printed in the build log.
+export function makeVersion(root) {
+  const git = (args) => execSync(`git ${args}`, { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] }).toString().trim();
   try {
     if (git('rev-parse --is-shallow-repository') === 'true') git('fetch --unshallow --quiet');
-    const count = Number(git(`rev-list --count ${baseCommit}..HEAD`));
+    const start = git('log --diff-filter=A --format=%H -- .version-start').split('\n').filter(Boolean).pop();
+    if (!start) throw new Error('.version-start is not committed yet');
+    const count = Number(git(`rev-list --count ${start}^..HEAD`));
     if (Number.isInteger(count) && count >= 0) return `${count}.0.0`;
-  } catch {
-    console.warn(`version: could not count commits since ${baseCommit}; using 0.0.0.`);
+    throw new Error(`unexpected commit count ${count}`);
+  } catch (error) {
+    console.warn(`version: ${String(error.message).split('\n')[0]}; using 0.0.0.`);
+    return '0.0.0';
   }
-  return '0.0.0';
 }
 
 // Fails the build loudly if a marker is missing, instead of shipping an unstamped worker.
