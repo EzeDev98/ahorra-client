@@ -30,23 +30,38 @@ export function makeBuildId(root) {
   return `${stamp}-${commit}`;
 }
 
-// 1.0.0, 2.0.0 ...: the number of commits from the one that added the .version-start file up to this build, counting that
-// commit as 1. Nothing has to be set by hand: every new commit raises the number. Hosts often clone only the latest commit,
-// so a shallow clone is completed first. If the history cannot be read the version falls back to 0.0.0 and the reason is
-// printed in the build log.
-export function makeVersion(root) {
-  const git = (args) => execSync(`git ${args}`, { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] }).toString().trim();
-  try {
-    if (git('rev-parse --is-shallow-repository') === 'true') git('fetch --unshallow --quiet');
-    const start = git('log --diff-filter=A --format=%H -- .version-start').split('\n').filter(Boolean).pop();
-    if (!start) throw new Error('.version-start is not committed yet');
-    const count = Number(git(`rev-list --count ${start}^..HEAD`));
-    if (Number.isInteger(count) && count >= 0) return `${count}.0.0`;
-    throw new Error(`unexpected commit count ${count}`);
-  } catch (error) {
-    console.warn(`version: ${String(error.message).split('\n')[0]}; using 0.0.0.`);
+// 1.0.0, 2.0.0 ...: one more than the version of the site that is live right now. Each build asks the live site's
+// /version.json for its version and adds 1, so every new build raises the number and nothing is set by hand. The site's address
+// is VERSION_SOURCE_URL, or RENDER_EXTERNAL_URL, which Render fills in. A live site with no version yet counts as 0, so the
+// first build with this code is 1.0.0.
+// The number must never go backwards. On Render (RENDER is set) a build that cannot read the live version is retried and then
+// FAILED, so nothing wrong is deployed and the live site keeps its current version. Only a build on a developer's own machine,
+// where there is no live site to ask, falls back to 0.0.0.
+export async function nextVersion() {
+  const onHost = Boolean(process.env.RENDER);
+  const base = (process.env.VERSION_SOURCE_URL || process.env.RENDER_EXTERNAL_URL || '').replace(/\/+$/, '');
+  const giveUp = (reason) => {
+    if (onHost) throw new Error(`version: ${reason}. Build stopped so the live version is not lost. Set VERSION_SOURCE_URL to the site address and redeploy.`);
+    console.warn(`version: ${reason}; using 0.0.0 (local build).`);
     return '0.0.0';
+  };
+  if (!base) return giveUp('no live site address (VERSION_SOURCE_URL or RENDER_EXTERNAL_URL)');
+
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const response = await fetch(`${base}/version.json?t=${Date.now()}`, { cache: 'no-store', signal: AbortSignal.timeout(15_000) });
+      const live = response.ok ? await response.json().catch(() => ({})) : {};
+      const current = Number.parseInt(String(live.version ?? '0'), 10);
+      const next = (Number.isInteger(current) && current >= 0 ? current : 0) + 1;
+      console.log(`version: live site is ${live.version ?? 'unversioned'}, this build is ${next}.0.0`);
+      return `${next}.0.0`;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
   }
+  return giveUp(`could not reach ${base} (${lastError.message})`);
 }
 
 // Fails the build loudly if a marker is missing, instead of shipping an unstamped worker.
@@ -55,7 +70,7 @@ function replaceOnce(text, marker, value, file) {
   return text.replace(marker, () => value);
 }
 
-export function ahorraServiceWorker(buildId) {
+export function ahorraServiceWorker(buildId, version) {
   let outDir;
 
   return {
@@ -86,7 +101,7 @@ export function ahorraServiceWorker(buildId) {
 
       writeFileSync(
         join(outDir, 'version.json'),
-        `${JSON.stringify({ buildId, builtAt: new Date().toISOString() }, null, 2)}\n`,
+        `${JSON.stringify({ buildId, version, builtAt: new Date().toISOString() }, null, 2)}\n`,
       );
 
       console.log(`service worker: build ${buildId}, ${precache.length} files precached`);
