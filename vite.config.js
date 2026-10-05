@@ -7,7 +7,7 @@ const src = (path) => fileURLToPath(new URL(`./src/${path}`, import.meta.url));
 
 // One id per build: stamped into sw.js, version.json and the app bundle, so the app can tell when a newer build exists.
 const BUILD_ID = makeBuildId(process.cwd());
-const VERSION = makeVersion(process.cwd(), '256ca4a');
+const VERSION = makeVersion(process.cwd(), '7b5c79d');
 
 // Keep these aliases in sync with jsconfig.json.
 export default defineConfig({
