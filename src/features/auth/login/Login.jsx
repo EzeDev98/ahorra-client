@@ -4,6 +4,7 @@ import './Login.css';
 import { ApiError } from '@core/http/httpClient.js';
 import { authApi } from '@features/auth/api/authApi.js';
 import { sessionManager } from '@features/auth/session/sessionManager.js';
+import { confirmTheme } from '@features/settings/appearance/themeSync.js';
 import { pendingVerification } from '@features/auth/verification/pendingVerification.js';
 import FormScreen from '@shared/components/layout/FormScreen.jsx';
 import Button from '@shared/components/ui/Button.jsx';
@@ -107,6 +108,8 @@ export default function Login({ welcomeTo, forgotPasswordTo, verifyPhoneTo, home
     } catch {
       destination = null;
     }
+    // The server's saved theme applies before the first signed-in screen (a reinstalled device starts without it).
+    await Promise.race([confirmTheme(), new Promise((resolve) => setTimeout(resolve, 800))]);
     navigate(destination ?? homeTo, { replace: true });
   };
 

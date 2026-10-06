@@ -1,4 +1,4 @@
-/* White in both themes: it continues the white native splash (manifest background_color), so the start never flashes. */
+/* White in light, the dark page colour in dark: it continues the native splash, so the start never flashes. */
 .loading-screen {
   position: fixed;
   inset: 0;
@@ -64,4 +64,4 @@
 }
 
 /* For a route guard that is waiting. Same look, but below the connection notice and toasts instead of over them. */
-.loading-screen--page { z-index: 1; }
+.loading-screen--page { z-index: 1; background: var(--color-bg); }

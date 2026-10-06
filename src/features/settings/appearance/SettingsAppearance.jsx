@@ -6,6 +6,7 @@ import ScreenContainer from '@shared/components/layout/ScreenContainer.jsx';
 import Radio from '@shared/components/ui/Radio.jsx';
 import { APPEARANCE_COPY } from './appearanceContent.js';
 import { themeStore } from './themeStore.js';
+import { chooseTheme } from './themeSync.js';
 
 // Route "/settings/appearance" (Step 11e). Light, dark, or the same as the device. The choice applies at once and is kept on
 // this device (themeStore). Radio is the only round shape in the app (Guide 4.4). Inner screen: top-aligned under PageHeader.
@@ -26,7 +27,7 @@ export default function SettingsAppearance({ backTo }) {
             label={option.label}
             hint={option.hint ?? undefined}
             checked={mode === option.value}
-            onChange={() => themeStore.set(option.value)}
+            onChange={() => chooseTheme(option.value)}
           />
         ))}
       </div>

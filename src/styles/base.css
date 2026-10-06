@@ -36,3 +36,6 @@ input, select, textarea {
   border-color: var(--focus-border);
   box-shadow: 0 0 0 var(--focus-ring-size) var(--focus-ring-color);
 }
+
+/* The page behind everything (overscroll, rubber-band) follows the theme. index.html paints it earlier, before this file loads. */
+:root { background: var(--color-bg); }

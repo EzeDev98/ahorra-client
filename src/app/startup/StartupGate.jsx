@@ -4,12 +4,15 @@ import LoadingScreen from '@shared/components/feedback/LoadingScreen.jsx';
 import { ROUTES } from '@app/router/routes.js';
 import { detectInstalledApp } from '@core/pwa/isPWAInstalled.js';
 import { decideRoute } from './decideRoute.js';
+import { confirmTheme } from '@features/settings/appearance/themeSync.js';
 
 // Fewest milliseconds the loading screen stays up, counted from when the page started loading: a fast start
 // does not flash it, and a slow start is not made slower. [PROPOSED]
 const MIN_VISIBLE_MS = 500;
 // Longest the start waits for the font. After this it carries on without it.
 const FONT_WAIT_MS = 1500;
+// Longest the start waits for the server to confirm the theme. After this it carries on; the answer still applies when it arrives.
+const THEME_WAIT_MS = 800;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -31,7 +34,7 @@ export default function StartupGate({ children }) {
   useEffect(() => {
     let cancelled = false;
     // The decision starts at once, alongside the wait for the font and the minimum time, so neither delays the other.
-    Promise.all([untilReady(), detectInstalledApp().then(() => decideRoute({ launching: true })).catch(() => null)]).then(([, destination]) => {
+    Promise.all([untilReady(), detectInstalledApp().then(() => decideRoute({ launching: true })).catch(() => null), Promise.race([confirmTheme(), sleep(THEME_WAIT_MS)])]).then(([, destination]) => {
       if (cancelled) return;
       if (destination && window.location.pathname === ROUTES.onboarding) {
         window.history.replaceState(window.history.state, '', destination);

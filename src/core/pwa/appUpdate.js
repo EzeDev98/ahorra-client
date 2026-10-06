@@ -12,6 +12,9 @@ export const RUNNING_BUILD = typeof __APP_BUILD_ID__ === 'string' ? __APP_BUILD_
 const APPLIED_KEY = 'ahorra.applied.build';
 // The only thing that survives a reset: the fact that the app is installed on this device.
 const INSTALLED_KEY = 'ahorra.installed';
+// Kept through the wipe: the install marker, and the theme choice with its unsent flag, so an update never changes how the app looks.
+// The theme keys are the ones themeStore.js and themeSync.js own.
+const KEPT_KEYS = [INSTALLED_KEY, 'ahorra.theme', 'ahorra.theme.pending'];
 
 const readApplied = () => {
   try {
@@ -106,9 +109,11 @@ export const appUpdate = {
     });
     await attempt(async () => sessionStorage.clear());
     await attempt(async () => {
-      const installed = localStorage.getItem(INSTALLED_KEY);
+      const kept = KEPT_KEYS.map((key) => [key, localStorage.getItem(key)]);
       localStorage.clear();
-      if (installed) localStorage.setItem(INSTALLED_KEY, installed);
+      kept.forEach(([key, value]) => {
+        if (value !== null) localStorage.setItem(key, value);
+      });
     });
     // The wipe removed the marker, so write it back or the next check offers the same update again.
     writeApplied(target);

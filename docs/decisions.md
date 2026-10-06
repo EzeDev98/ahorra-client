@@ -137,7 +137,7 @@ Prototype approved by the owner before any code. Font, text sizes and colours ar
 | Decision | `decideStart()` in `src/app/startup/`: browser tab gives no decision (Onboarding and Install); installed and not signed in gives Welcome; installed and signed in gives Home. Step 5e adds "setup done?" and "locked?". The dev bypass counts as installed. Applies only when the app opens at the start route; deep links are left to the route guards. | PROPOSED |
 | Hand-over | `StartupGate` sits outside the router. When ready it rewrites the address with `history.replaceState`, mounts the router on the right screen, and fades the loading screen out over it (`--motion-base`, `--motion-reduced` when asked). Nothing navigates. | ADOPTED |
 | Paths | `StartupGate` takes `startPath`, `homeTo`, `welcomeTo` and holds no path. `App.jsx` passes literals until Step 5 supplies them from `routes.js`. | ADOPTED |
-| Dark mode | The loading screen stays white in dark mode, because it continues the white native splash. A dark-mode launch therefore fades from white to the dark first screen. | OPEN (owner) |
+| Dark mode | The whole start follows the theme: dark launch images (iOS), a loading screen that is white in light and the dark page colour in dark, an inline script in index.html that applies the saved theme before first paint, and a server check (GET /appearance) during the loading screen. The Android native splash stays white (Chrome has no supported dark manifest colour). Both native splashes follow the device setting, not the in-app choice. | ADOPTED (owner, 6 Oct 2026) |
 
 ## Step 5a decisions
 

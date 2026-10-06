@@ -9,7 +9,7 @@ const MARGIN = 0.12; // share of the size kept free on every side, for the shado
 const BLUR = 0.025; // blur radius, as a share of the size
 const DROP = 0.015; // how far the shadow sits below the logo, as a share of the size
 
-export async function logoWithShadow(source, size) {
+export async function logoWithShadow(source, size, withShadow = true) {
   const margin = Math.round(size * MARGIN);
   const inner = size - 2 * margin;
   const clear = { r: 0, g: 0, b: 0, alpha: 0 };
@@ -32,7 +32,7 @@ export async function logoWithShadow(source, size) {
 
   return sharp({ create: { width: size, height: size, channels: 4, background: clear } })
     .composite([
-      { input: shadow, top: Math.round(size * DROP), left: 0 },
+      ...(withShadow ? [{ input: shadow, top: Math.round(size * DROP), left: 0 }] : []),
       { input: logo, top: 0, left: 0 },
     ])
     .png()

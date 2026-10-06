@@ -2,7 +2,7 @@ import './LoadingScreen.css';
 import { cx } from '@shared/utils/classNames.js';
 import { LOADING_COPY } from './loadingContent.js';
 
-// The in-app loading screen: white, with the logo, the tagline and three pulsing dots, between the native splash and
+// The in-app loading screen: white in light and dark in dark, with the logo, the tagline and three pulsing dots, between the native splash and
 // the first screen. index.html holds an identical static copy that shows until React mounts, so nothing changes on
 // screen at the hand-over. If you change this markup or LoadingScreen.css, change that copy too.
 // The logo is the "A" alone on a transparent background (public/logo-mark.png), with a soft shadow so it stands out on white.
