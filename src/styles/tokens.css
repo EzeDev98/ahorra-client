@@ -50,10 +50,10 @@
   --color-over: light-dark(var(--p-terracotta-600), var(--p-terracotta-300));
   --color-error: light-dark(var(--p-red-600), var(--p-red-300));
 
-  /* Startup screen: white in light, the dark page colour in dark, matching the native splash. */
-  --color-splash-bg: light-dark(var(--p-white), var(--p-bg-dark));
-  --color-splash-logo: light-dark(var(--p-ink-600), var(--p-ink-300));
-  --color-splash-text: light-dark(var(--p-muted-light), var(--p-muted-dark));
+  /* Startup screen: always the dark page colour, whatever theme is chosen, matching the native splash (manifest background_color). */
+  --color-splash-bg: var(--p-bg-dark);
+  --color-splash-logo: var(--p-ink-300);
+  --color-splash-text: var(--p-muted-dark);
 
   --font-family: "Red Hat Text", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-weight: 400;
@@ -106,7 +106,8 @@
   --z-toast: 100;
   --z-splash: 120;
   --splash-logo-size: 96px;
-  --splash-logo-shadow: drop-shadow(0 4px 10px light-dark(rgba(42, 75, 155, 0.35), transparent));
+  --splash-logo-shadow: none;
+  --page-loading-logo-shadow: drop-shadow(0 4px 10px light-dark(rgba(42, 75, 155, 0.35), transparent));
   --splash-gap: 16px;
   --splash-dot-size: 8px;
   --splash-dot-cycle: 1500ms;

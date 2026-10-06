@@ -1,4 +1,4 @@
-/* White in light, the dark page colour in dark: it continues the native splash, so the start never flashes. */
+/* Always the dark page colour: it continues the native splash (manifest background_color), so the start never flashes. The fade to the first screen then lands on whatever theme is chosen. */
 .loading-screen {
   position: fixed;
   inset: 0;
@@ -64,4 +64,8 @@
 }
 
 /* For a route guard that is waiting. Same look, but below the connection notice and toasts instead of over them. */
+/* A page cover appears mid-session, over a themed app, so it takes the chosen theme instead of the dark start look. */
 .loading-screen--page { z-index: 1; background: var(--color-bg); }
+.loading-screen--page .loading-screen__logo { filter: var(--page-loading-logo-shadow); }
+.loading-screen--page .loading-screen__tagline { color: var(--color-text-muted); }
+.loading-screen--page .loading-screen__dot { background: var(--color-brand); }

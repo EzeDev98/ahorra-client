@@ -1,6 +1,6 @@
 // Generates the iOS launch images and writes their <link> tags into index.html. Run with: npm run splash
 // iOS ignores the manifest splash: without these images an installed app shows a blank screen while it starts.
-// Each image is the plain "A" logo with a soft shadow, centred on white, matching the white native splash on Android (manifest background_color).
+// Each image is the plain "A" logo with a soft shadow, centred on the dark page colour with no shadow. The start is always dark, whatever theme is chosen, and matches the manifest background_color.
 // Source: assets/logo-mark.png. Portrait only.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
@@ -12,8 +12,7 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 const outDir = `${root}public/splash/`;
 const htmlPath = `${root}index.html`;
 
-const BACKGROUND = '#FFFFFF'; // matches the manifest background_color
-const BACKGROUND_DARK = '#0F1219'; // the dark page colour (--p-bg-dark)
+const BACKGROUND = '#0F1219'; // the dark page colour (--p-bg-dark); matches the manifest background_color. The start is always dark.
 const LOGO_SHARE = 0.36; // the logo's canvas (shadow room included), as a share of the screen's shorter side
 
 // [width, height, pixel ratio] in CSS pixels, portrait. iOS 17.5 and later only (the device gate's floor).
@@ -59,26 +58,18 @@ for (const [width, height, ratio] of DEVICES) {
   const pixelWidth = width * ratio;
   const pixelHeight = height * ratio;
   const file = `${pixelWidth}x${pixelHeight}.png`;
-  const darkFile = `${pixelWidth}x${pixelHeight}-dark.png`;
 
   const logoSize = Math.round(Math.min(pixelWidth, pixelHeight) * LOGO_SHARE);
-  const logo = await logoWithShadow(markSource, logoSize);
+  const logo = await logoWithShadow(markSource, logoSize, false); // no shadow: it would not show on dark
 
   await sharp({ create: { width: pixelWidth, height: pixelHeight, channels: 3, background: BACKGROUND } })
     .composite([{ input: logo, gravity: 'center' }])
     .png({ compressionLevel: 9 })
     .toFile(`${outDir}${file}`);
 
-  const darkLogo = await logoWithShadow(markSource, logoSize, false);
-  await sharp({ create: { width: pixelWidth, height: pixelHeight, channels: 3, background: BACKGROUND_DARK } })
-    .composite([{ input: darkLogo, gravity: "center" }])
-    .png({ compressionLevel: 9 })
-    .toFile(`${outDir}${darkFile}`);
-
   const media = `(device-width: ${width}px) and (device-height: ${height}px) and (-webkit-device-pixel-ratio: ${ratio}) and (orientation: portrait)`;
-  links.push(`    <link rel="apple-touch-startup-image" href="/splash/${file}" media="${media} and (prefers-color-scheme: light)" />`);
-  links.push(`    <link rel="apple-touch-startup-image" href="/splash/${darkFile}" media="${media} and (prefers-color-scheme: dark)" />`);
-  console.log(`public/splash/${file} and ${darkFile}`);
+  links.push(`    <link rel="apple-touch-startup-image" href="/splash/${file}" media="${media}" />`);
+  console.log(`public/splash/${file}`);
 }
 
 writeFileSync(htmlPath, `${html.slice(0, from + START.length)}\n${links.join('\n')}\n    ${html.slice(to)}`);

@@ -21,7 +21,7 @@ async function untilReady() {
   await sleep(MIN_VISIBLE_MS - performance.now());
 }
 
-// The startup sequence (Guide §5): white native splash, then the loading screen, then one routing decision
+// The startup sequence (Guide §5): dark native splash, then the loading screen, then one routing decision
 // (decideRoute.js). Place it OUTSIDE the router. While the loading screen shows, the router is not mounted. When
 // ready, the answer is written to the address with history.replaceState, the router then mounts straight on the right
 // screen, and the loading screen fades out over it. Nothing navigates and nothing flashes.
