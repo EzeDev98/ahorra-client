@@ -77,7 +77,7 @@
   --motion-fly: 440ms;
   --motion-stagger: 70ms;
   --motion-reduced: 120ms;
-  --motion-reveal: 500ms;  /* start-up: the loading screen fading away over the first screen */
+  --motion-reveal: 700ms;  /* start-up: the loading screen fading away over the first screen */
   --motion-loop: 1600ms;   /* install hero: the arrow entering the phone */
   --motion-nudge: 1400ms;  /* Get started arrow */
   --motion-type: 1400ms;   /* onboarding demo: the typed entry */

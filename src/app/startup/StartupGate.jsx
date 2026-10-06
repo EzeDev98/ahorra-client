@@ -9,7 +9,7 @@ import { confirmTheme } from '@features/settings/appearance/themeSync.js';
 // Fewest milliseconds the loading screen stays up, counted from when it first appeared (index.html stamps that moment on
 // window.__loadingShownAt, so a slow page load does not use it up). A fast start still holds the screen long enough to read as a
 // pause, not a flash. [PROPOSED]
-const MIN_VISIBLE_MS = 1200;
+const MIN_VISIBLE_MS = 3000;
 // Longest the start waits for the font. After this it carries on without it.
 const FONT_WAIT_MS = 1500;
 // Longest the start waits for the server to confirm the theme. After this it carries on; the answer still applies when it arrives.
