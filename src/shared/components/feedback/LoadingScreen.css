@@ -40,19 +40,6 @@
 }
 
 /* --loader-phase puts the dots on a shared clock (see LoadingScreen.jsx), so the copy in index.html and this one pulse in step. */
-/* The tagline and dots fade in on the first frame; the logo is always fully visible. --loader-intro-offset lets the React copy carry on
-   from where the static copy in index.html had got to (see LoadingScreen.jsx), so the fade never restarts. */
-.loading-screen__tagline,
-.loading-screen__dots {
-  animation: loading-intro var(--motion-intro) var(--ease-standard) backwards;
-  animation-delay: var(--loader-intro-offset, 0ms);
-}
-
-@keyframes loading-intro {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
 .loading-screen__dot:nth-child(1) { animation-delay: var(--loader-phase, 0ms); }
 .loading-screen__dot:nth-child(2) { animation-delay: calc(var(--loader-phase, 0ms) + var(--splash-dot-cycle) / 3); }
 .loading-screen__dot:nth-child(3) { animation-delay: calc(var(--loader-phase, 0ms) + var(--splash-dot-cycle) * 2 / 3); }
@@ -75,11 +62,6 @@
   .loading-screen__dot {
     animation: none;
     opacity: 0.6;
-  }
-
-  .loading-screen__tagline,
-  .loading-screen__dots {
-    animation-duration: var(--motion-reduced);
   }
 }
 
