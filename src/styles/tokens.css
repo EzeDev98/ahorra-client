@@ -106,7 +106,8 @@
   --z-overlay: 80;
   --z-toast: 100;
   --z-splash: 120;
-  --splash-logo-size: 96px;
+  --splash-logo-size: 151px;
+  --splash-logo-size-page: 96px;
   --splash-logo-shadow: none;
   --page-loading-logo-shadow: drop-shadow(0 4px 10px light-dark(rgba(42, 75, 155, 0.35), transparent));
   --splash-gap: 16px;

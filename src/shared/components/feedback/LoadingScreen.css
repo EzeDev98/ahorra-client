@@ -68,6 +68,10 @@
 /* For a route guard that is waiting. Same look, but below the connection notice and toasts instead of over them. */
 /* A page cover appears mid-session, over a themed app, so it takes the chosen theme instead of the dark start look. */
 .loading-screen--page { z-index: 1; background: var(--color-bg); }
-.loading-screen--page .loading-screen__logo { filter: var(--page-loading-logo-shadow); }
+.loading-screen--page .loading-screen__logo {
+  inline-size: var(--splash-logo-size-page);
+  block-size: var(--splash-logo-size-page);
+  filter: var(--page-loading-logo-shadow);
+}
 .loading-screen--page .loading-screen__tagline { color: var(--color-text-muted); }
 .loading-screen--page .loading-screen__dot { background: var(--color-brand); }
