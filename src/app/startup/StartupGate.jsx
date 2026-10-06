@@ -6,9 +6,10 @@ import { detectInstalledApp } from '@core/pwa/isPWAInstalled.js';
 import { decideRoute } from './decideRoute.js';
 import { confirmTheme } from '@features/settings/appearance/themeSync.js';
 
-// Fewest milliseconds the loading screen stays up, counted from when the page started loading: a fast start
-// does not flash it, and a slow start is not made slower. [PROPOSED]
-const MIN_VISIBLE_MS = 500;
+// Fewest milliseconds the loading screen stays up, counted from when it first appeared (index.html stamps that moment on
+// window.__loadingShownAt, so a slow page load does not use it up). A fast start still holds the screen long enough to read as a
+// pause, not a flash. [PROPOSED]
+const MIN_VISIBLE_MS = 1200;
 // Longest the start waits for the font. After this it carries on without it.
 const FONT_WAIT_MS = 1500;
 // Longest the start waits for the server to confirm the theme. After this it carries on; the answer still applies when it arrives.
@@ -18,7 +19,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function untilReady() {
   await Promise.race([document.fonts?.ready, sleep(FONT_WAIT_MS)]);
-  await sleep(MIN_VISIBLE_MS - performance.now());
+  await sleep(MIN_VISIBLE_MS - (performance.now() - (window.__loadingShownAt ?? 0)));
 }
 
 // The startup sequence (Guide §5): dark native splash, then the loading screen, then one routing decision
@@ -53,7 +54,7 @@ export default function StartupGate({ children }) {
     let frame = requestAnimationFrame(() => {
       frame = requestAnimationFrame(() => {
         if (!screen.current) return;
-        run(screen.current, [{ opacity: 1 }, { opacity: 0 }], { duration: 'base', ease: 'standard', fill: 'forwards' }).then(() => {
+        run(screen.current, [{ opacity: 1 }, { opacity: 0 }], { duration: 'reveal', ease: 'standard', fill: 'forwards' }).then(() => {
           if (!cancelled) setPhase('done');
         });
       });
