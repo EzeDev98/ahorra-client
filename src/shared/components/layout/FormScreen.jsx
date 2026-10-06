@@ -7,11 +7,13 @@ import { cx } from '@shared/utils/classNames.js';
 // Frame for a screen that is a form: back button, optional step indicator, title, description,
 // the fields (children), then the actions (footer, usually block Buttons).
 // Pass onSubmit and the body becomes a <form> (Enter submits; use a Button with type="submit").
-// Without onSubmit the body is a plain <div>. step is a slot for <StepIndicator />.
+// Without onSubmit the body is a plain <div>. step is a slot for <StepIndicator />. hero is a slot above the title
+// (an illustration or large emoji); screens that do not pass it are unchanged.
 export default function FormScreen({
   title,
   description,
   step,
+  hero,
   onBack,
   backLabel = 'Back',
   onSubmit,
@@ -37,6 +39,7 @@ export default function FormScreen({
         {onBack && <IconButton icon={ArrowLeft} label={backLabel} className="ui-form-screen__back" onClick={onBack} />}
       </div>
       <div className="ui-screen__group">
+        {hero}
         {step}
         <header className="ui-form-screen__head">
           <h1 className="ui-form-screen__title">{title}</h1>

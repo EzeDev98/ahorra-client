@@ -40,6 +40,8 @@
   --color-field-line: light-dark(var(--p-field-light), var(--p-field-dark));
   --color-focus-tint: light-dark(var(--p-focus-tint-light), var(--p-focus-tint-dark));
   --color-hover: light-dark(var(--p-hover-light), var(--p-hover-dark));
+  /* Brand at low strength: the fill behind an emoji tile. */
+  --color-tile: color-mix(in srgb, var(--color-brand) 12%, transparent);
   --color-scrim: light-dark(var(--p-scrim-light), var(--p-scrim-dark));
 
   /* Verdicts. Always paired with a word or icon, never colour alone. */
@@ -75,6 +77,9 @@
   --motion-fly: 440ms;
   --motion-stagger: 70ms;
   --motion-reduced: 120ms;
+  --motion-loop: 1600ms;   /* install hero: the arrow entering the phone */
+  --motion-nudge: 1400ms;  /* Get started arrow */
+  --motion-type: 1400ms;   /* onboarding demo: the typed entry */
   --motion-hover: 120ms; /* colour fade on hover, nothing moves */
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -105,6 +110,15 @@
   --splash-gap: 16px;
   --splash-dot-size: 8px;
   --splash-dot-cycle: 1500ms;
+
+  /* Onboarding and install: emoji tiles, hero, arrows. */
+  --tile-size: 40px;       --tile-emoji: 20px;
+  --tile-size-sm: 32px;    --tile-emoji-sm: 16px;
+  --hero-box: 72px;        --hero-emoji: 48px;
+  --feed-box-width: 120px; --feed-arrow: 30px;
+  --feed-from: -18px;      --feed-to: 12px;       --feed-out: 22px;
+  --arrow-nudge: 5px;
+  --rise: 10px;
 }
 
 /* Settings, Appearance: force a theme. No attribute means follow the system. */

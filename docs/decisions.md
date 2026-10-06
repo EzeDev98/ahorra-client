@@ -99,6 +99,21 @@ ESLint is pinned to 9: `eslint-plugin-react` does not support ESLint 10 yet. Rev
 | Tagline | "Say what you spent. Ahorra keeps the books." Also the manifest `description`. | PROPOSED |
 | Feature points | Four: write it in your own words; nothing counts until you confirm; honest about your means; a short report each day. Typing only (voice is deferred); nothing about offline. All in `onboardingContent.js`. | PROPOSED |
 
+## Onboarding and install redesign (6 Oct 2026)
+
+Prototype approved by the owner before any code. Font, text sizes and colours are unchanged: only existing tokens are used, plus the new tile, hero and motion tokens in `tokens.css`.
+
+| Item | Answer | Status |
+|---|---|---|
+| Cards and emoji | Onboarding feature points are one `Card` each with an `EmojiTile`; the install screens sit inside one card. This **overrides** two earlier rules: "no card" (Guide 4.8) and "line icons instead of emoji". It applies to Onboarding and the install flow only; every other screen is unchanged. | AGREED (owner, 6 Oct 2026) |
+| Radius | Stays at 4px everywhere, so no pills and no round tiles. | AGREED |
+| Headline | Three levels: the "Ahorra" wordmark (brand, `text-lg`), "Tell Ahorra what you spent." (text colour, `text-lg`), "It keeps the books." (muted, `text-md`). The wordmark sits 8px above the headline. | AGREED (owner, 6 Oct 2026) |
+| Demo | A typed entry, then the confirm card it becomes, then Confirm tapped. Decorative (`aria-hidden`), copy in `onboardingContent.js` (`DEMO`). | AGREED |
+| Get started | A forward arrow after the label that leans forward and back (`--motion-nudge`). Onboarding only. | AGREED |
+| Install hero | A phone emoji with a solid blue arrow that slides into it on a loop (`PhoneFeed`). The arrow is drawn, not the 📲 emoji, so it can move. "You're all set!" shows 🎉. No fill behind either. | AGREED |
+| Install card | `FormScreen` gets an optional `hero` slot; `.install-card` turns its group into the card, so the back button stays in the bar. `InfoBanner` gets an optional `emoji`. Both additions change nothing for other screens. | ADOPTED |
+| Motion | Reduced motion turns all of it off: everything is shown at rest and the arrows stand still. | ADOPTED |
+
 ## Step 4g decisions
 
 | Item | Answer | Status |

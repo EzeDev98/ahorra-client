@@ -3,7 +3,8 @@ import './Install.css';
 import FormScreen from '@shared/components/layout/FormScreen.jsx';
 import Button from '@shared/components/ui/Button.jsx';
 import InfoBanner from '@shared/components/ui/InfoBanner.jsx';
-import { HANDOFF_COPY, HANDOFF_PLACE } from './installContent.js';
+import { DONE_EMOJI, HANDOFF_COPY, HANDOFF_PLACE, PHONE_EMOJI } from './installContent.js';
+import PhoneFeed from './PhoneFeed.jsx';
 
 // How long to wait after window.close() before concluding the browser refused. Browsers ignore close() on tabs
 // they did not open from a script, which is every tab a person opened themselves.
@@ -24,6 +25,8 @@ export default function InstallHandoff({ platform }) {
 
   return (
     <FormScreen
+      className="install-card"
+      hero={closeBlocked ? <span className="install__hero" aria-hidden="true">{DONE_EMOJI}</span> : <PhoneFeed />}
       title={closeBlocked ? HANDOFF_COPY.doneTitle : HANDOFF_COPY.installingTitle}
       description={HANDOFF_COPY.description(place)}
       footer={
@@ -34,7 +37,7 @@ export default function InstallHandoff({ platform }) {
         )
       }
     >
-      <InfoBanner>{HANDOFF_COPY.banner(place)}</InfoBanner>
+      <InfoBanner emoji={PHONE_EMOJI}>{HANDOFF_COPY.banner(place)}</InfoBanner>
       {closeBlocked && <p className="install__footnote">{HANDOFF_COPY.closeNote}</p>}
     </FormScreen>
   );

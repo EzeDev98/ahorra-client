@@ -1,23 +1,73 @@
+/* The install screens sit inside one card. FormScreen's group becomes the card, so the back button stays in the bar above. */
+.install-card .ui-screen__inner { padding-bottom: var(--gutter); }
+
+.install-card .ui-screen__group {
+  padding: calc(var(--gutter) * 1.5) var(--gutter);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-line);
+  border-radius: var(--radius);
+  animation: install-rise var(--motion-base) var(--ease-out) both;
+}
+
+.install-card .ui-form-screen__body { padding-bottom: 0; }
+
+/* Inside the card, inner cards and the banner take the page colour so they stand apart from it. */
+.install-card .ui-card,
+.install-card .ui-banner { background: var(--color-bg); }
+
+/* Hero: the phone with an arrow entering it. */
+.install__feed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--feed-box-width);
+  height: var(--hero-box);
+  margin-inline: auto;
+}
+
+.install__feed-phone {
+  position: relative;
+  z-index: 1;
+  font-size: var(--hero-emoji);
+  line-height: 1;
+  animation: install-receive var(--motion-loop) ease-in-out infinite;
+}
+
+.install__feed-arrow {
+  width: var(--feed-arrow);
+  height: var(--feed-arrow);
+  margin-inline-end: calc(var(--gap) * -1);
+  fill: var(--color-brand);
+  animation: install-feed var(--motion-loop) ease-in infinite;
+}
+
+/* Hero for "You're all set!": one large emoji, no tile. */
+.install__hero {
+  display: grid;
+  place-items: center;
+  width: var(--hero-box);
+  height: var(--hero-box);
+  margin-inline: auto;
+  font-size: var(--hero-emoji);
+  line-height: 1;
+  animation: install-pop var(--motion-fly) var(--ease-out) both;
+}
+
 .install__steps {
   display: flex;
   flex-direction: column;
-  gap: var(--gutter);
+  gap: var(--gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .install__step {
   display: flex;
   align-items: flex-start;
-  gap: var(--gutter);
-}
-
-/* Centres the icon on the step text, which sits under the small "Step n" label. */
-.install__icon {
-  flex: none;
-  width: var(--icon-size);
-  height: var(--icon-size);
-  margin-top: calc(var(--leading-xs) + (var(--leading-sm) - var(--icon-size)) / 2);
-  stroke-width: var(--icon-stroke);
-  color: var(--color-brand);
+  gap: var(--card-pad);
+  animation: install-rise var(--motion-base) var(--ease-out) both;
+  animation-delay: calc(200ms + var(--i) * var(--motion-stagger));
 }
 
 .install__step-label {
@@ -32,7 +82,38 @@
 }
 
 .install__footnote {
+  text-align: center;
   font-size: var(--text-sm);
   line-height: var(--leading-sm);
   color: var(--color-text-muted);
+}
+
+@keyframes install-rise {
+  from { opacity: 0; transform: translateY(var(--rise)); }
+}
+
+@keyframes install-pop {
+  from { opacity: 0; transform: scale(0.8); }
+}
+
+@keyframes install-feed {
+  0% { transform: translateX(var(--feed-from)); opacity: 0; }
+  25% { opacity: 1; }
+  75% { transform: translateX(var(--feed-to)); opacity: 1; }
+  100% { transform: translateX(var(--feed-out)); opacity: 0; }
+}
+
+@keyframes install-receive {
+  0%, 70% { transform: none; }
+  85% { transform: scale(1.07); }
+  100% { transform: none; }
+}
+
+/* Reduced motion: the card and steps are simply there, and the arrow rests beside the phone. */
+@media (prefers-reduced-motion: reduce) {
+  .install-card .ui-screen__group,
+  .install__step,
+  .install__hero,
+  .install__feed-phone,
+  .install__feed-arrow { animation: none; }
 }

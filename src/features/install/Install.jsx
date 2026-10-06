@@ -6,9 +6,12 @@ import { canPromptInstall, getInstallPlatform } from '@core/pwa/installPlatform.
 import { isPWAInstalled, isRunningAsApp } from '@core/pwa/isPWAInstalled.js';
 import FormScreen from '@shared/components/layout/FormScreen.jsx';
 import Button from '@shared/components/ui/Button.jsx';
+import Card from '@shared/components/ui/Card.jsx';
+import EmojiTile from '@shared/components/ui/EmojiTile.jsx';
 import InfoBanner from '@shared/components/ui/InfoBanner.jsx';
 import { COPY, MANUAL_STEPS } from './installContent.js';
 import InstallHandoff from './InstallHandoff.jsx';
+import PhoneFeed from './PhoneFeed.jsx';
 
 // How long to wait for the browser's install prompt before showing manual steps.
 const PROMPT_WAIT_MS = 10000;
@@ -73,6 +76,8 @@ export default function Install({ backTo, welcomeTo }) {
 
   return (
     <FormScreen
+      className="install-card"
+      hero={<PhoneFeed />}
       title={COPY.title}
       description={phase === 'manual' ? COPY.manualDescription : COPY.description}
       onBack={() => navigate(backTo)}
@@ -88,14 +93,14 @@ export default function Install({ backTo, welcomeTo }) {
         <>
           {cancelled && <InfoBanner>{COPY.cancelled}</InfoBanner>}
           <ol className="install__steps">
-            {MANUAL_STEPS[platform].map(({ icon: Icon, text }, index) => (
-              <li key={text} className="install__step">
-                <Icon className="install__icon" aria-hidden="true" />
+            {MANUAL_STEPS[platform].map(({ emoji, text }, index) => (
+              <Card as="li" key={text} className="install__step" style={{ '--i': index }}>
+                <EmojiTile emoji={emoji} />
                 <div>
                   <p className="install__step-label">Step {index + 1}</p>
                   <p className="install__step-text">{text}</p>
                 </div>
-              </li>
+              </Card>
             ))}
           </ol>
         </>
