@@ -39,3 +39,8 @@ input, select, textarea {
 
 /* The page behind everything (overscroll, rubber-band) follows the theme. index.html paints it earlier, before this file loads. */
 :root { background: var(--color-bg); }
+
+/* A screen change slides the screen 16px sideways. Without this the page briefly becomes scrollable and the
+   phone flashes its scroll indicators on the right and bottom edges (light in dark mode). Clipping sideways
+   overflow on the page itself stops that; up-and-down scrolling is untouched. */
+html, body { overflow-x: clip; }
