@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
+import { queryClient } from '@core/data/queryClient.js';
+import { queryKeys } from '@core/data/queryKeys.js';
 import { run } from '@core/motion/motion.js';
 import { sessionManager } from '@features/auth/session/sessionManager.js';
+import { incomeApi } from '@features/setup/api/incomeApi.js';
+import { obligationsApi } from '@features/setup/api/obligationsApi.js';
+import { setupStatus } from '@features/setup/setupStatus.js';
 import FormScreen from '@shared/components/layout/FormScreen.jsx';
 import Button from '@shared/components/ui/Button.jsx';
 import FormField from '@shared/components/ui/FormField.jsx';
@@ -48,6 +53,13 @@ export default function Unlock({ homeTo }) {
   useEffect(() => {
     if (!pinStore.has()) goOn();
   }, [goOn]);
+
+  // While the PIN is being typed, read what Home's setup guard will ask for, so it finds the answer ready and no loading screen
+  // flashes after unlocking. A failed read is ignored here: the guard asks again and handles it.
+  useEffect(() => {
+    queryClient.prefetchQuery({ queryKey: queryKeys.income.current(), queryFn: incomeApi.get });
+    if (!setupStatus.isComplete()) queryClient.prefetchQuery({ queryKey: queryKeys.obligations.list(), queryFn: obligationsApi.list });
+  }, []);
 
   // Put the cursor back in the first box after a failed attempt, and when a wait ends.
   useEffect(() => {
