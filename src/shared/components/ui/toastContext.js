@@ -6,6 +6,7 @@ export const ToastContext = createContext(null);
 // toast.show('Saved');                          neutral
 // toast.show('Could not save', { tone: 'error' });  tones: 'neutral' | 'success' | 'error'
 // toast.show('Saved', { duration: 2000 });      milliseconds
+// toast.show('Discarded', { action: { label: 'Undo', onClick } });  one button; pressing it also closes the toast
 // toast.dismiss(id) closes one early; show() returns the id.
 export function useToast() {
   const value = useContext(ToastContext);

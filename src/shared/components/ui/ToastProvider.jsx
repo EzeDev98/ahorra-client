@@ -25,10 +25,10 @@ export default function ToastProvider({ children }) {
   }, []);
 
   const show = useCallback(
-    (message, { tone = 'neutral', duration } = {}) => {
+    (message, { tone = 'neutral', duration, action } = {}) => {
       counter.current += 1;
       const id = counter.current;
-      setItems((list) => [...list, { id, message, tone, leaving: false }].slice(-MAX_VISIBLE));
+      setItems((list) => [...list, { id, message, tone, action, leaving: false }].slice(-MAX_VISIBLE));
       timers.current.set(id, setTimeout(() => dismiss(id), duration ?? DURATION[tone] ?? DURATION.neutral));
       return id;
     },
@@ -52,6 +52,7 @@ export default function ToastProvider({ children }) {
               key={item.id}
               tone={item.tone}
               message={item.message}
+              action={item.action}
               leaving={item.leaving}
               onDismiss={() => dismiss(item.id)}
             />

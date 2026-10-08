@@ -6,6 +6,7 @@ import InfoBanner from '@shared/components/ui/InfoBanner.jsx';
 import EditEntrySheet from './EditEntrySheet.jsx';
 import PendingCard from './PendingCard.jsx';
 import useConfirmEntry from './useConfirmEntry.js';
+import useDiscardEntry from './useDiscardEntry.js';
 import { flyFromBell, flyToBell, pulseBell } from './flyToBell.js';
 import { parkedEntries } from './parkedEntries.js';
 import { STACK_COPY } from './pendingContent.js';
@@ -43,8 +44,10 @@ export default function PendingStack({ entries, gated, note, loadFailed, retryin
   const [shown, setShown] = useState([]);
   const known = useRef(null); // ids the list has shown; null until the first answer arrives
   const confirmEntry = useConfirmEntry();
+  const discardEntry = useDiscardEntry();
   const inFlight = useRef(new Set()); // ids being confirmed right now, so a second tap does nothing
   const [confirming, setConfirming] = useState([]); // the same ids, for showing the busy state
+  const [discarding, setDiscarding] = useState([]); // ids being discarded right now
   const [editing, setEditing] = useState(null); // the entry the edit sheet shows; kept while the sheet closes
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetKey, setSheetKey] = useState(0); // new at every opening, so the form starts from the entry again
@@ -77,6 +80,30 @@ export default function PendingStack({ entries, gated, note, loadFailed, retryin
     if (!confirmed) {
       inFlight.current.delete(id);
       setConfirming((current) => current.filter((item) => item !== id));
+    }
+  };
+
+  // Discard, from the edit sheet: the card fades out like a confirmed one and a toast offers Undo. It is allowed while the
+  // day is gated, because it is how a wrong entry stops blocking the day.
+  const discard = async (entry, onError) => {
+    const id = String(entry.id);
+    if (inFlight.current.has(id)) return;
+    inFlight.current.add(id);
+    setDiscarding((current) => [...current, id]);
+
+    const discarded = await discardEntry(
+      entry,
+      () => {
+        setSheetOpen(false);
+        const card = list.current?.querySelector(`[data-entry-id="${CSS.escape(id)}"]`);
+        return card ? run(card, LEAVE, { fill: 'forwards' }) : undefined;
+      },
+      { onError },
+    );
+
+    if (!discarded) {
+      inFlight.current.delete(id);
+      setDiscarding((current) => current.filter((item) => item !== id));
     }
   };
 
@@ -191,7 +218,7 @@ export default function PendingStack({ entries, gated, note, loadFailed, retryin
           gated={gated}
           onGatedSwipe={shakeNote}
           onEdit={() => edit(entry)}
-          busy={confirming.includes(String(entry.id))}
+          busy={confirming.includes(String(entry.id)) || discarding.includes(String(entry.id))}
         />
       ))}
       {editing && (
@@ -201,7 +228,9 @@ export default function PendingStack({ entries, gated, note, loadFailed, retryin
           open={sheetOpen}
           onClose={() => setSheetOpen(false)}
           onConfirm={(edits, onError) => confirm(editing, edits, onError)}
+          onDiscard={(onError) => discard(editing, onError)}
           busy={confirming.includes(String(editing.id))}
+          discardBusy={discarding.includes(String(editing.id))}
         />
       )}
     </div>

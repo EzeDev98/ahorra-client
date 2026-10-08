@@ -11,7 +11,7 @@ import IconButton from '@shared/components/ui/IconButton.jsx';
 import SelectField from '@shared/components/ui/SelectField.jsx';
 import TextField from '@shared/components/ui/TextField.jsx';
 import { formatMoney } from '@shared/utils/formatMoney.js';
-import { ERRORS, FLOW_OPTIONS, LABELS, MAX_ITEMS, SHEET, VENDOR_MAX } from './editEntryContent.js';
+import { DISCARD, ERRORS, FLOW_OPTIONS, LABELS, MAX_ITEMS, SHEET, VENDOR_MAX } from './editEntryContent.js';
 import { draftTotal, toDraft, toEdits, validateDraft } from './editEntryRules.js';
 import useCategories from './useCategories.js';
 
@@ -20,14 +20,17 @@ import useCategories from './useCategories.js';
 // list (Step 17); the account is not editable here until accounts have a lookup too (Guide 8.1).
 // entry: the pending entry being edited. open/onClose: the sheet's visibility. busy: a confirm for this entry is in flight.
 // onConfirm(edits, onError) -> Promise<boolean>: the stack confirms and, on a server complaint, calls onError(message).
+// onDiscard(onError) -> Promise<boolean>: the same for throwing the entry away. Discard asks once more before it acts, and
+// it works while the day is gated. discardBusy: a discard for this entry is in flight.
 // Give it a new `key` each time it opens, so the form starts from the entry again.
-export default function EditEntrySheet({ entry, open, onClose, onConfirm, busy }) {
+export default function EditEntrySheet({ entry, open, onClose, onConfirm, onDiscard, busy, discardBusy = false }) {
   const formId = useId();
   const form = useRef(null);
   const [draft, setDraft] = useState(() => toDraft(entry));
   const [errors, setErrors] = useState(null);
   const [problem, setProblem] = useState('');
   const [focusTick, setFocusTick] = useState(0);
+  const [asking, setAsking] = useState(false); // the "Discard this entry?" step is showing
   const nextKey = useRef(draft.items.length);
   const { categories } = useCategories();
   // The picker lists the user's categories, plus the entry's current one if it has since been switched off, so it never shows blank.
@@ -76,21 +79,45 @@ export default function EditEntrySheet({ entry, open, onClose, onConfirm, busy }
     await onConfirm(toEdits(entry, draft), setProblem);
   };
 
+  const working = busy || discardBusy;
+
   return (
     <BottomSheet
       open={open}
       onClose={onClose}
-      dismissible={!busy}
+      dismissible={!working}
       title={SHEET.title}
       footer={
-        <>
-          <Button variant="ghost" disabled={busy} onClick={onClose}>
-            {SHEET.cancel}
-          </Button>
-          <Button type="submit" form={formId} busy={busy}>
-            {SHEET.confirm}
-          </Button>
-        </>
+        asking ? (
+          <div className="edit-entry__ask" role="alert">
+            <div className="edit-entry__ask-text">
+              <p>{DISCARD.question}</p>
+              <p className="edit-entry__ask-detail">{DISCARD.detail}</p>
+            </div>
+            <div className="edit-entry__ask-actions">
+              <Button disabled={discardBusy} onClick={() => setAsking(false)}>
+                {DISCARD.keep}
+              </Button>
+              <Button variant="secondary" busy={discardBusy} onClick={() => onDiscard(setProblem)}>
+                {DISCARD.confirm}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {onDiscard && (
+              <Button variant="ghost" className="edit-entry__discard" disabled={working} onClick={() => setAsking(true)}>
+                {DISCARD.open}
+              </Button>
+            )}
+            <Button variant="ghost" disabled={working} onClick={onClose}>
+              {SHEET.cancel}
+            </Button>
+            <Button type="submit" form={formId} busy={busy} disabled={discardBusy}>
+              {SHEET.confirm}
+            </Button>
+          </>
+        )
       }
     >
       <form id={formId} ref={form} className="edit-entry" noValidate autoComplete="off" onSubmit={submit}>

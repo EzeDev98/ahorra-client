@@ -1,6 +1,6 @@
 import { httpClient } from '@core/http/httpClient.js';
 
-// PendingEntry: { id, rawEntryId, status: 'PENDING' | 'CONFIRMED' | 'EDITED', flow: 'EXPENSE' | 'INCOME', entryDate, vendor,
+// PendingEntry: { id, rawEntryId, status: 'PENDING' | 'CONFIRMED' | 'EDITED' | 'DISCARDED', flow: 'EXPENSE' | 'INCOME', entryDate, vendor,
 //                 categoryId, categoryName, accountId, accountName, items: [{ description, amount }], totalAmount }
 
 // One fresh id per capture attempt. Sending the same id again returns the entry already created, never a second one.
@@ -22,4 +22,13 @@ export const entriesApi = {
   //      { flow?, entryDate?: 'yyyy-MM-dd', vendor? (max 255), categoryId?, accountId?, items?: [{ description, amount }] (max 50) }
   // out: PendingEntry. 423 day gated.
   confirm: (id, edits) => httpClient.post(`/entries/pending/${encodeURIComponent(id)}/confirm`, edits),
+
+  // POST /entries/pending/{id}/discard
+  // Throws the entry away without posting anything. The server keeps the row (status DISCARDED), so it can be restored.
+  // Works while the day is gated. out: PendingEntry. 404 not found, 400 already confirmed.
+  discard: (id) => httpClient.post(`/entries/pending/${encodeURIComponent(id)}/discard`),
+
+  // POST /entries/pending/{id}/restore
+  // Undoes a discard. If the entry's day has closed meanwhile it comes back dated today. out: PendingEntry.
+  restore: (id) => httpClient.post(`/entries/pending/${encodeURIComponent(id)}/restore`),
 };

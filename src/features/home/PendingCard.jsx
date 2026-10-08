@@ -58,6 +58,7 @@ export default function PendingCard({ entry, onConfirm, onLater, onEdit, busy = 
         <span>{formatMoney(totalAmount)}</span>
       </div>
       <div className="home__card-actions">
+        <span className="home__card-hint">{CARD_COPY.hint}</span>
         <Button variant="ghost" disabled={!onLater || busy || gated} onClick={onLater}>
           {CARD_COPY.later}
         </Button>

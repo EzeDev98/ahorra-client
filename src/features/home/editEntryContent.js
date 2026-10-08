@@ -34,3 +34,12 @@ export const ERRORS = {
 // The server's limits for the confirm body (ConfirmRequest).
 export const MAX_ITEMS = 50;
 export const VENDOR_MAX = 255;
+
+// The two-step discard inside the sheet: ask first, so a stray tap never throws an entry away.
+export const DISCARD = {
+  open: 'Discard entry',
+  question: 'Discard this entry?',
+  detail: 'It will not count toward your spending.',
+  keep: 'Keep entry',
+  confirm: 'Discard',
+};

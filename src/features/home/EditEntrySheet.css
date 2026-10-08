@@ -35,3 +35,33 @@
   font-size: var(--text-md);
   line-height: var(--leading-md);
 }
+
+/* Discard sits at the far left of the footer, away from Confirm. */
+.edit-entry__discard { margin-right: auto; }
+
+/* The question lives in the footer, so it never scrolls out of sight: words on the left, the two buttons on the right,
+   and on a narrow screen the buttons drop under the words. */
+.edit-entry__ask {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+  font-size: var(--text-md);
+  line-height: var(--leading-md);
+}
+
+.edit-entry__ask-text { flex: 1 1 12em; }
+
+.edit-entry__ask-actions {
+  display: flex;
+  gap: var(--gap);
+  margin-left: auto;
+}
+
+.edit-entry__ask-detail {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-text-muted);
+}

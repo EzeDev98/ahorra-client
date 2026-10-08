@@ -121,9 +121,19 @@
 
 .home__card-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: var(--gap);
   margin-top: calc(var(--gap) * 1.25);
+}
+
+/* The quiet line that says the card itself can be tapped; it takes the free space left of the buttons. */
+.home__card-hint {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  color: var(--color-text-muted);
 }
 
 /* A card that can be tapped to edit. */
